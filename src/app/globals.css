@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+    scroll-behavior: smooth;
+}
+button,
+input {
+    outline: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    cursor: default;
+}
+h1::selection,
+h2::selection,
+h3::selection,
+h4::selection,
+h5::selection,
+h6::selection,
+p::selection {
+    background-color: #14b8a6;
+    color: #ffffff;
+}
+
+.mask-animation {
+    -webkit-mask: linear-gradient(-60deg, #000 30%, #0005, #000 50%) right / 300% 100%;
+    mask: linear-gradient(-60deg, #000 30%, #0005, #000 50%) right / 300% 100%;
+    animation: nsshine 3s infinite;
+}
+
+/*? Start Portfolio Slider Styles ( Global Slider Component For Services Pages ) */
+.portfolio-slider > .swiper-wrapper {
+    padding: 20px 0 !important;
+}
+.portfolio-slider > .swiper-wrapper > .swiper-slide {
+    transform: scale(1, 0.8) !important;
+    transition: all 300ms ease-in-out !important;
+}
+.portfolio-slider > .swiper-wrapper > .swiper-slide.swiper-slide-next {
+    transform: scale(1, 0.9) !important;
+    transition: all 300ms ease-in-out !important;
+}
+.portfolio-slider > .swiper-wrapper > .swiper-slide.swiper-slide.swiper-slide-active {
+    transform: scale(1) !important;
+    transition: all 300ms ease-in-out !important;
+}
+.portfolio-slider > .swiper-wrapper > .swiper-slide.swiper-slide-prev {
+    transform: scale(1, 0.9) !important;
+    transition: all 300ms ease-in-out !important;
+}
+/*? End Portfolio Slider Styles ( Global Slider Component For Services Pages ) */
+
+@media screen and (max-width: 768px) {
+    .mySwiper .swiper-wrapper .swiper-slide.swiper-slide-active,
+    .mySwiper3 .swiper-wrapper .swiper-slide.swiper-slide-active,
+    .mySwiper4 .swiper-wrapper .swiper-slide.swiper-slide-active,
+    .mySwiper6 .swiper-wrapper .swiper-slide.swiper-slide-active,
+    .mySwiper7 .swiper-wrapper .swiper-slide.swiper-slide-active,
+    .mySwiper8 .swiper-wrapper .swiper-slide.swiper-slide-active,
+    .mySwiper9 .swiper-wrapper .swiper-slide.swiper-slide-active,
+    .mySwiper10 .swiper-wrapper .swiper-slide.swiper-slide-active {
+        transform: scale(1.1) !important;
+        transition: all 300ms ease-in-out !important;
+    }
+    /* Start Home Page Brands Slider Styles */
+    .mySwiper8 > .swiper-wrapper > .swiper-slide.swiper-slide-active > img {
+        filter: grayscale(0);
+    }
+    /* End Home Page Brands Slider Styles */
+    .mySwiper2 .swiper-wrapper {
+        padding: 20px 0 !important;
+    }
+}
+
+/* Start Web Design Page Portfolio Preview Slider Section Styles */
+.mySwiper6 > .swiper-wrapper {
+    padding: 50px 0 !important;
+}
+
+.mySwiper10 .swiper-wrapper {
+    padding: 40px 0 !important;
+}
+
+.mySwiper3 .swiper-wrapper,
+.mySwiper4 .swiper-wrapper,
+.mySwiper7 .swiper-wrapper,
+.mySwiper8 .swiper-wrapper,
+.mySwiper9 .swiper-wrapper {
+    padding: 20px 0 !important;
+}
+
+/* Start All Animation Styles */
+@keyframes nsshine {
+    0% {
+        -webkit-mask-position: 140% 140%;
+        mask-position: 140% 140%;
+    }
+
+    100% {
+        -webkit-mask-position: -20% -20%;
+        mask-position: -20% -20%;
+    }
+}
+/* End All Animation Styles */
