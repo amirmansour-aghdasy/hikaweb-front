@@ -52,7 +52,7 @@ const Navbar = () => {
                                     <MenuItems
                                         transition
                                         anchor="bottom start"
-                                        className="w-52 origin-top-right rounded-xl bg-slate-200 border-b-4 shadow border-teal-500 p-1 text-sm/6 text-slate-500 transition duration-100 ease-out [--anchor-gap:--spacing(1)] focus:outline-none data-closed:scale-95 data-closed:opacity-0"
+                                        className="w-52 z-10 origin-top-right rounded-xl bg-slate-200 border-b-4 shadow border-teal-500 p-1 text-sm/6 text-slate-500 transition duration-100 ease-out [--anchor-gap:--spacing(1)] focus:outline-none data-closed:scale-95 data-closed:opacity-0"
                                     >
                                         {children.map(({ title, url }, index) => (
                                             <MenuItem key={index}>

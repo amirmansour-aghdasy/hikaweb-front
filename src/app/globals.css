@@ -85,8 +85,11 @@ p::selection {
     padding: 50px 0 !important;
 }
 
-.mySwiper10 .swiper-wrapper {
+.mySwiper10 > .swiper-wrapper {
     padding: 40px 0 !important;
+}
+.mySwiper10 > .swiper-wrapper > .swiper-slide {
+    height: 100% !important;
 }
 
 .mySwiper3 .swiper-wrapper,

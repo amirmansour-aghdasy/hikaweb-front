@@ -35,8 +35,8 @@ export default function LoginPage() {
 
     return (
         <div className="relative w-full max-w-4xl h-[550px] mx-auto bg-white m-5 rounded-3xl shadow-lg overflow-hidden">
-            <div className="absolute right-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 transition-[all,visibility] duration-[600ms] ease-in-out delay-[1200ms] [transition:visibility_0s_1s] max-[650px]:bottom-0 max-[650px]:w-full max-[650px]:h-[70%]">
-                <form className="w-full">
+            <div className="absolute right-0 w-1/2 h-full z-[1] bg-white flex items-center text-gray-800 text-center p-10 transition-[all,visibility] duration-[600ms] ease-in-out delay-[1200ms] [transition:visibility_0s_1s] max-[650px]:bottom-0 max-[650px]:w-full max-[650px]:h-[70%]">
+                <form className="w-full" onSubmit={() => {}}>
                     <h1 className="text-4xl -mt-2 text-slate-700" data-aos="fade-down">
                         ورود و ثبت نام
                     </h1>
@@ -54,7 +54,7 @@ export default function LoginPage() {
                     <button
                         data-aos="fade-right"
                         type="submit"
-                        className="w-full h-12 bg-teal-500 hover:bg-teal-600 transition-colors duration-300 ease-in-out rounded-[8px] shadow-[0_0_10px_rgba(0,0,0,0.1)] text-white font-semibold text-[16px]"
+                        className="w-full h-12 bg-teal-500 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded-[8px] shadow-[0_0_10px_rgba(0,0,0,0.1)] text-white font-semibold text-[16px]"
                     >
                         ارسال
                     </button>
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
                 <div className="absolute left-0 w-1/2 h-full text-white flex flex-col justify-center items-center z-[2] transition-all duration-[600ms] ease-in-out delay-[1200ms] max-[650px]:w-full max-[650px]:h-[30%] max-[650px]:top-0">
                     <Image
-                        src="/assets/images/large-logo-text.png"
+                        src="/assets/logo/large-logo-text.png"
                         width={0}
                         height={0}
                         sizes="100vw"

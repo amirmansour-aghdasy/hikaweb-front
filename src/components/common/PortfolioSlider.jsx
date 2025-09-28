@@ -14,12 +14,12 @@ const PortfolioSlider = ({ order, slides }) => {
             slidesPerView={1.9}
             centeredSlides={true}
             modules={[Autoplay, Navigation]}
-            className={`w-full mySwiper${order} relative portfolio-slider`}
+            className={`w-full mySwiper${order && order} relative portfolio-slider`}
             breakpoints={{ 640: { slidesPerView: 4, spaceBetween: 7 } }}
         >
-            {slides.map(({ src, alt, title }, i) => (
+            {slides.map(({ imageSrc, alt, title }, i) => (
                 <SwiperSlide className="rounded-xl overflow-hidden" key={i}>
-                    <Image src={src} width="0" height="0" sizes="100vw" className="w-full h-auto" alt={alt} title={title} />
+                    <Image src={imageSrc} width="0" height="0" sizes="100vw" className="w-full h-auto" alt={alt} title={title} />
                 </SwiperSlide>
             ))}
         </Swiper>
