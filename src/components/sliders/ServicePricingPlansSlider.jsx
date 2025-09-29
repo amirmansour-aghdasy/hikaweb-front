@@ -13,13 +13,13 @@ const ServicePricingPlansSlider = ({ order, slides }) => {
             slidesPerView={1.3}
             autoplay={true}
             loop={slides?.length > 3}
-            centeredSlides={slides?.length > 3}
+            centeredSlides={true}
             spaceBetween={25}
             autoHeight={true}
-            breakpoints={{ 768: { slidesPerView: slides.length > 3 ? 3.5 : 3, spaceBetween: 10 } }}
+            breakpoints={{ 768: { slidesPerView: slides.length > 3 ? 3.5 : 3, spaceBetween: 25, centeredSlides: slides?.length > 3 } }}
         >
             {slides.map((plan, index) => (
-                <SwiperSlide key={index} className="w-full rounded-2xl shadow-md">
+                <SwiperSlide key={index} className={`w-full rounded-2xl shadow-md  ${slides.length <= 3 && "translateUp"} cursor-default`}>
                     <PricingPlanCard plan={plan} />
                 </SwiperSlide>
             ))}

@@ -91,6 +91,19 @@ p::selection {
 .mySwiper10 > .swiper-wrapper > .swiper-slide {
     height: 100% !important;
 }
+.mySwiper10 > .swiper-wrapper > .swiper-slide.translateUp:hover {
+    transition: all 0.3s ease-in-out !important;
+    transform: translateY(-6px) !important;
+}
+
+.mySwiper11 > .swiper-wrapper {
+    padding: 40px 0 0 0 !important;
+    align-items: stretch !important;
+}
+.mySwiper11 > .swiper-wrapper > .swiper-slide {
+    padding-bottom: 20px !important;
+    height: auto !important;
+}
 
 .mySwiper3 .swiper-wrapper,
 .mySwiper4 .swiper-wrapper,

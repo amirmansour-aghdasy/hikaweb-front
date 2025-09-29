@@ -14,7 +14,7 @@ const PortfolioSlider = ({ order, slides }) => {
             slidesPerView={1.9}
             centeredSlides={true}
             modules={[Autoplay, Navigation]}
-            className={`w-full mySwiper${order && order} relative portfolio-slider`}
+            className={`w-full relative portfolio-slider`}
             breakpoints={{ 640: { slidesPerView: 4, spaceBetween: 7 } }}
         >
             {slides.map(({ imageSrc, alt, title }, i) => (

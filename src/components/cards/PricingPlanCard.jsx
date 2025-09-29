@@ -26,9 +26,7 @@ const PricingPlanCard = ({ plan: { title, value, forWho, features } }) => {
                     </span>
                     <span className="text-base md:text-lg text-white font-bold">شرایط پرداخت اقساط</span>
                 </h3>
-                <button className="w-8/12 text-center text-sm md:text-lg text-teal-900 rounded-md py-1.5 md:py-0.5 bg-white">
-                    درخواست مشاوره
-                </button>
+                <button className="w-8/12 text-center text-sm md:text-lg text-teal-900 rounded-md py-1.5 md:py-0.5 bg-white">درخواست مشاوره</button>
             </div>
         </div>
     );
