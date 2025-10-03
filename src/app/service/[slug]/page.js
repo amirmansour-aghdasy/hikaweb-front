@@ -35,6 +35,8 @@ const SingleServiceDetailsPage = async ({ params }) => {
         })),
     };
 
+    console.log("process", Boolean(process))
+
     return (
         <>
             <Head>
@@ -67,8 +69,8 @@ const SingleServiceDetailsPage = async ({ params }) => {
                         </button>
                     </div>
                 </section>
-                {pricing && <ServicePricingPlansSlider order={""} slides={pricing} />}
-                {subServices && (
+                {pricing.length > 1 && <ServicePricingPlansSlider order={""} slides={pricing} />}
+                {subServices.length > 1 && (
                     <section className="w-full" id="logo-design-process-section">
                         <div className="w-full flex items-center justify-start gap-2">
                             <h3 className="text-xl md:text-2xl text-slate-700 font-bold whitespace-nowrap">
@@ -89,7 +91,7 @@ const SingleServiceDetailsPage = async ({ params }) => {
                         </div>
                     </section>
                 )}
-                {process && (
+                {process.length > 1 && (
                     <section className="w-full relative" id="logo-design-process-section">
                         <div className="w-full flex items-center justify-start gap-2">
                             <h3 className="text-xl md:text-2xl text-slate-700 font-bold whitespace-nowrap">
@@ -125,7 +127,7 @@ const SingleServiceDetailsPage = async ({ params }) => {
                         {faqs.map(({ question, answer }, index) => (
                             <Disclosure as="div" className="shadow-inner bg-[#F4F4F4] rounded-xl" defaultOpen={index === 0 ? true : false} key={index} data-aos="fade-up" data-aos-delay={index * 150}>
                                 <DisclosureButton className="bg-[#A5D1D1] rounded-xl py-2.5 md:py-3 px-3 text-base md:text-lg">{question}</DisclosureButton>
-                                <DisclosurePanel className="p-3 text-sm md:text-base text-[#0E443C] leading-8">{answer}</DisclosurePanel>
+                                <DisclosurePanel className="p-3 text-sm h-auto md:text-base text-[#0E443C] leading-7">{answer}</DisclosurePanel>
                             </Disclosure>
                         ))}
                     </div>

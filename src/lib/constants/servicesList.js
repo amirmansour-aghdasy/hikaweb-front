@@ -2,7 +2,7 @@ export const services_list = [
     {
         title: "سئو و بینه سازی",
         giffSrc: "/assets/giff/market-research.gif",
-        url: "/service/seo",
+        url: "/service/seo-and-optimization",
     },
     {
         title: "هیکا استودیو",
@@ -22,7 +22,7 @@ export const services_list = [
     {
         title: "مدیریت شبکه های اجتماعی",
         giffSrc: "/assets/giff/social-media.gif",
-        url: "/service/social-management",
+        url: "/service/social-marketing",
     },
     {
         title: "تولید محتوا و تدوین",
