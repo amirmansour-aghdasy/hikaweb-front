@@ -41,7 +41,7 @@ const SingleServiceDetailsPage = async ({ params }) => {
                 <title>خدمات ${title} - آژانس دیجیتال مارکتینگ هیکاوب</title>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
             </Head>
-            <main className="w-full py-5 md:py-14 flex flex-col gap-10 md:gap-14" id={`${slug}-service-main-content`}>
+            <main className="w-full py-5 md:py-14 flex flex-col gap-10 md:gap-14 overflow-x-hidden md:overflow-x-visible" id={`${slug}-service-main-content`}>
                 <Image src={mainBanner} width={1346} height={298} sizes="100vw" className="w-full h-32 md:h-auto" alt={title} title={title} data-aos="zoom-in" priority />
                 <section className="w-full grid grid-cols-12 gap-7 place-items-center">
                     <div className="w-full col-span-12 md:col-span-5 flex flex-col gap-y-3.5">
