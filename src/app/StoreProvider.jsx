@@ -11,7 +11,7 @@ export default function StoreProvider({ children }) {
 
     useEffect(() => {
         Aos.init({
-            duration: 1500,
+            duration: 1700,
             once: false,
         });
     }, []);

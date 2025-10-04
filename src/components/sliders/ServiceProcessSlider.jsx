@@ -11,7 +11,7 @@ const ServiceProcessSlider = ({ process }) => {
     const [atStart, setAtStart] = useState(true);
 
     return (
-        <div className="w-full relative">
+        <div className="w-full relative" data-aos="zoom-in">
             {!atEnd && <div className="absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-white/60 to-transparent z-10"></div>}
             {!atStart && <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white/60 to-transparent z-10"></div>}
             <Swiper

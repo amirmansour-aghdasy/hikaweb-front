@@ -4,6 +4,7 @@
 
 * {
     scroll-behavior: smooth;
+    outline: none;
 }
 button,
 input {

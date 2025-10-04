@@ -954,32 +954,205 @@ export const services = {
         mainContent: {
             firstSection: {
                 content: {
-                    title: "",
-                    description: "",
-                    actionBtnText: "",
+                    title: "تولید محتوا ، ساده اما پر دردسر !",
+                    description:
+                        "تولید محتوای ویدیویی یکی از فعالیت های ضروری برای معرفی کسب و کار ها به مخاطب در همه جای دنیاست ،  در صورتی که شما بتوانید کسب و کار خود را با کیفیت و تسلط بالا در ویدیو ها معرفی کنید میتوانید مخاطبین  بسیاری را جذب خدمات یا محصولات خود کنید . اما تولید یک ویدیو حرفه ای با سکانس های استاندارد و موزیک خوب و تدوین استاندارد ممکنه کابوسی زمانبر برای هر کسب و کاری باشد ! هیکاوب با بیش از پنج سال سابقه در زمینه تولید محتوای ویدیویی و تدوین میتواند بار این فعالیت را از دوش کسب و کار شما بردارد",
+                    actionBtnText: "ثبت سفارش",
                 },
-                slides: [],
+                slides: [
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-1.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-2.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-3.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-4.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-5.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-6.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-7.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-8.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-9.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-10.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-11.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-12.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-13.webp",
+                        alt: "",
+                        title: "",
+                    },
+                ],
             },
             secondSection: {
                 content: {
-                    title: "",
-                    description: "",
-                    actionBtnText: "",
+                    title: "تدوین خیلی اثر گذار است !",
+                    description:
+                        "بسیاری از کسب و کار ها فقط به دنبال گرفتن ویدیو با کیفیت بالا هستند! باید بگوییم این کاملا اشتباه است و تدوین ارتباط نهایی و چشمی را با مخاطب شما میگیرد . تدوین شامل اجرای افکت های ویدیویی ، افکت های صوتی ، صداگذاری و اصلاح صدای ویدیو و پیاده سازی اجزای برند شما از جمله رنگ سازمانی روی ویدیو های شماست . پهیکاوب میتواند در کنار تولید محتوایی با کیفیت تدوین ویدیو های شمارا با حداکثر سرعت و کیفیت بر عهده بگیرد.",
+                    actionBtnText: "ثبت سفارش",
                 },
-                slides: [],
+                slides: [
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-14.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-15.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-16.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-17.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-18.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-19.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-20.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-21.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-22.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-23.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-24.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-25.webp",
+                        alt: "",
+                        title: "",
+                    },
+                    {
+                        imageSrc: "/assets/portfolio/content-and-editing/content-and-editing-26.webp",
+                        alt: "",
+                        title: "",
+                    },
+                ],
             },
         },
-        pricing: [],
+        pricing: [
+            {
+                title: "پکیج تدوین اقتصادی",
+                value: "15.000.000 تومان",
+                subTitle: "مناسب کسب و کار های تازه کار",
+                features: ["تدوین کامل 12 ویدیو", "زیرنویس گذاری ", "صداگذاری ", "کپشن نویسی ", "طراحی 12کاور ویدیو"],
+                desc: "اگه خودت بتونی تولید محتوا کنی! ماهم برات امادش میکنیم!",
+            },
+            {
+                title: "پکیج تدوین ویژه",
+                value: "29.000.000 تومان",
+                subTitle: "مناسب فروشگاه های حرفه ای و با سابقه",
+                features: ["تولید محتوا با تجهیزات", "ضبط 16 ویدیو در 4 جلسه", "سناریو نویسی", "تدوین کامل 16 ویدیو", "صداگذاری و زیرنویس", "طراحی 16 کاور ویدیو", "کپشن نویسی"],
+                desc: "میخوای ویدیوهات حرفه ای باشه؟ این پکیج بی نیازت میکنه!",
+            },
+            {
+                title: "پکیج تدوین اقتصادی",
+                value: "24.000.000 تومان",
+                subTitle: "مناسب فروشگاه های با سابقه",
+                features: ["تولید محتوا با تجهیزات", "ضبط 12 ویدیو در 3 جلسه ", "سناریو نویسی", "تدوین کامل 12 ویدیو", "صداگذاری و زیرنویس", "طراحی 12 کاور ویدیو", "کپشن نویسی"],
+                desc: "هم به صرفس هم خیالتو از ویدیوهات راحت میکنه!",
+            },
+        ],
         subServices: [],
         process: [],
         finalDesc: {
             content: {
-                title: "",
-                text: "",
+                title: "هم سناریو ،هم فیلمبرداری ، هم تدوین با ماست !",
+                text: "ویدیو میخوام واسه کسب و کارم ، ولش کن ، حالشو ندارم ! این جمله خیلی از صاحبین کسب و کاره که میدونن در پلتفرمای مختلفی مثل اینستاگرام نیاز به تولید محتوا و انتشار ویدیو با کیفیت دارن برای فروش بیشتر ، ولی به قدری این پروسه رو سخت و طاقت فرسا میدونن که بی خیال تولید محتوا و ویدیو گذاری میشن ! ما اینجاییم که این بار رو از دوش صاحبین کسب و کار برداریم.",
             },
-            image: "",
+            image: "/assets/images/content-and-editing-final-desc-img.png",
         },
-        faqs: [],
+        faqs: [
+            {
+                question: "به صورت پروژه همکاری دارید یا ماهانه؟",
+                answer: "هم به صورت پروژه ای هم به صورت ماهانه هیکاوب میتواند با شما همکاری کند . بستگی به نیاز کسب و کار شما در تولید محتوا و تدوین دارد . پیش از شروع بهتر است با ما در ارتباط باشید و مشاوره ای استاندارد دریافت نمایید تا انتخابی درست داشته باشید.",
+            },
+            {
+                question: "تولید محتوا با دوربین فیلمبرداری است یا موبایل ؟",
+                answer: "به دلیل کیفیت بالای دوربین تلفن های هوشمند و صرفه جویی در هزینه اکثر کسب و کار ها تمایل به فیلم برداری با موبایل های نسل جدید هستند ، اما شما  میتوانید درخواست تولید محتوا با دوربین فیلم برداری و یا با دوربین موبایل های نسل جدید را داشته باشید.",
+            },
+            {
+                question: "تولید محتوا و تدوین حرفه ای چه تاثیری دارد؟",
+                answer: "در مرتبه اول میتوان گفت شما کلاس برند و کیفیت محصول و خدمات خود را با بالاترین کیفیت نشان میدهید و در مرتبه دوم  میتوان به تاثیر بسیار بالای ویدیویی حرفه ای بر تمایل مشتری و مخاطب برای خرید از شما اشاره کرد.",
+            },
+            {
+                question: "تدوین با پریمیر انجام میشود یا نرم افزار موبایل؟",
+                answer: "این مورد نیز بستگی به نوع نیاز شما و کسب و کارتان دارد و مقدار هزینه ای که میخواهید انجام بدهید . در مشاوره با ما تمامی نیاز ها شناسایی و بهترین انتخاب به شما پیشنهاد میشود.",
+            },
+        ],
     },
     "logo-design": {
         title: "طراحی لوگو و برند سازی",

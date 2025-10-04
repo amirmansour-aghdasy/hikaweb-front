@@ -6,12 +6,12 @@ import { CallCallingFill, InstagramOutlined, LocationFill, RubikaFill, TelegramF
 const ContactUsPage = () => {
     return (
         <main className="w-full py-7 md:py-14 flex flex-col gap-7 md:gap-14 overflow-hidden md:overflow-visible">
-            <Image src="/assets/banners/contact-us.webp" sizes="100vw" width="0" height="0" className="w-full h-32 md:h-auto rounded-2xl" alt="تماس با ما" title="تماس با ما" data-aos="zoom-in" />
+            <Image src="/assets/banners/contact-us.webp" sizes="100vw" width={1440} height={374} className="w-full h-32 md:h-auto rounded-2xl" alt="تماس با ما" title="تماس با ما" data-aos="zoom-in" priority />
             <section className="w-full grid grid-cols-12 items-stretch gap-7">
                 <div className="w-full flex flex-1 col-span-12 md:col-span-4">
                     <ContactUsForm />
                 </div>
-                <div className="w-full flex-1 col-span-12 md:col-span-8 bg-[#A5D1D1] rounded-2xl p-3.5 flex flex-col items-center justify-between gap-y-5 lg:gap-0">
+                <div className="w-full flex-1 col-span-12 md:col-span-8 bg-[#A5D1D1] rounded-2xl p-3.5 flex flex-col items-center justify-between gap-3.5">
                     <div className="w-full h-72 rounded-2xl overflow-hidden" data-aos="zoom-out">
                         <iframe
                             className="w-full h-full"
@@ -25,23 +25,27 @@ const ContactUsPage = () => {
                         ></iframe>
                     </div>
                     <div className="w-full">
-                        <p className="w-full flex items-center gap-2 md:gap-2.5 text-[#0E443C] text-xs md:text-xl font-bold md:font-normal p-2.5 bg-[#F5F5F5] shadow rounded-xl" data-aos="zoom-in">
+                        <p className="w-full flex items-center gap-2 md:gap-2.5 text-[#0E443C] text-sm md:text-xl font-bold md:font-normal p-2.5 bg-[#F5F5F5] shadow rounded-xl" data-aos="zoom-in">
                             <LocationFill className="size-6 md:size-8" />
                             تهران، بزرگراه اشرفی اصفهانی، محمدی (محله‌ی مرزداران)
                         </p>
-                        <div className="w-full grid grid-cols-3 gap-2 sm:gap-3.5 sm bg-[#F5F5F5] p-2.5 rounded-xl mt-3.5" data-aos="zoom-out">
-                            <span className="w-full flex justify-center items-center text-xs md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C]">
+                        <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-3.5 bg-[#F5F5F5] p-2.5 rounded-xl mt-3.5" data-aos="zoom-out">
+                            <a href="tel:09120997935" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] cursor-pointer">
                                 09120997935
-                                <CallCallingFill className="text-[#008987] size-6 md:size-8" />
-                            </span>
-                            <span className="w-full flex justify-center items-center text-xs md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C]">
+                                <CallCallingFill className="text-[#008987] size-5 md:size-8" />
+                            </a>
+                            <a href="tel:09191393479" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] cursor-pointer">
                                 09191393479
-                                <CallCallingFill className="text-[#008987] size-6 md:size-8" />
-                            </span>
-                            <span className="w-full flex justify-center items-center text-xs md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C]">
-                                09120997935
-                                <CallCallingFill className="text-[#008987] size-6 md:size-8" />
-                            </span>
+                                <CallCallingFill className="text-[#008987] size-5 md:size-8" />
+                            </a>
+                            <a href="tel:02144276519" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] cursor-pointer">
+                                02144276519
+                                <CallCallingFill className="text-[#008987] size-5 md:size-8" />
+                            </a>
+                            <a href="tel:02144277208" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] cursor-pointer">
+                                02144277208
+                                <CallCallingFill className="text-[#008987] size-5 md:size-8" />
+                            </a>
                         </div>
                     </div>
                     <div className="flex items-center gap-x-3.5">

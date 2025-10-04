@@ -17,6 +17,7 @@ const ServicePricingPlansSlider = ({ order, slides }) => {
             spaceBetween={25}
             autoHeight={true}
             breakpoints={{ 768: { slidesPerView: slides.length > 3 ? 3.5 : 3, spaceBetween: 25, centeredSlides: slides?.length > 3 } }}
+            data-aos="fade-up"
         >
             {slides.map((plan, index) => (
                 <SwiperSlide key={index} className={`w-full rounded-2xl shadow-md  ${slides.length <= 3 && "translateUp"} cursor-default`}>

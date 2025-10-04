@@ -2,10 +2,3 @@ export { navbarItems } from "./navbarItems";
 export { teamMembers } from "./teamMembers";
 export { info_preview } from "./infoPreview";
 export { services_list } from "./servicesList";
-export { graphicDesignSubservices } from "./graphicDesignSubServices";
-export { webDesignProcessContent } from "./webDesignProcessContent";
-export { logoDesignProcessContent } from "./logoDesignProcessContent";
-export { printingSubServicesContent } from "./printingSubServicesContent"
-export { webDesignSubServicesContent } from "./webDesignSubServicesContent";
-export { hikaStudioSubServicesContent } from "./hikaStudioSubServicesContent";
-export { webDesignPortfolioPreviewContent } from "./webDesignPortfolioPreviewContent";

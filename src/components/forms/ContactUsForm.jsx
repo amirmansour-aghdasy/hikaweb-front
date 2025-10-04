@@ -6,7 +6,7 @@ const ContactUsForm = () => {
     };
 
     return (
-        <form onSubmit={() => handleSubmit()} className="w-full rounded-2xl bg-[#008987] flex flex-col gap-y-2.5 pb-5 md:pb-10 pt-5 md:pt-10">
+        <form onSubmit={() => handleSubmit()} className="w-full rounded-2xl bg-[#008987] flex flex-col gap-3.5 pb-5 md:pb-10 pt-5 md:pt-10">
             <h2 className="text-xs text-slate-700 rounded-xl bg-white shadow-md px-3.5 py-2 mx-auto" data-aos="fade-down">تماس با ما</h2>
             <div className="w-full flex justify-center items-center">
                 <span className="w-full h-0.5 bg-white" data-aos="fade-left" />
@@ -15,7 +15,7 @@ const ContactUsForm = () => {
                 </span>
                 <span className="w-full h-0.5 bg-white" data-aos="fade-right" />
             </div>
-            <div className="w-11/12 md:w-10/12 mx-auto flex flex-col gap-y-2.5 mt-3.5 md:mt-0">
+            <div className="w-11/12 md:w-10/12 mx-auto flex flex-col gap-3.5 mt-3.5 md:mt-0">
                 <input type="text" name="" id="" className="w-full rounded-lg text-sm p-2.5 md:p-3.5 placeholder:text-xs border border-[#0E443C]" placeholder="نام و نام خانوادگی" data-aos="fade-left" />
                 <input type="text" name="" id="" className="w-full rounded-lg text-sm p-2.5 md:p-3.5 placeholder:text-xs border border-[#0E443C]" placeholder="شماره همراه" data-aos="fade-right" />
                 <input type="text" name="" id="" className="w-full rounded-lg text-sm p-2.5 md:p-3.5 placeholder:text-xs border border-[#0E443C]" placeholder="ایمیل خود را وارد نمائید" data-aos="zoom-out" />

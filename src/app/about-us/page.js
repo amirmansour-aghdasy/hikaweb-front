@@ -9,12 +9,13 @@ const AboutUsPage = () => {
             <Image
                 src="/assets/banners/about-us.webp"
                 sizes="100vw"
-                width="0"
-                height="0"
+                width={1440}
+                height={374}
                 className="w-full h-32 md:h-auto rounded-2xl"
                 alt="درباره ما"
                 title="درباره ما"
                 data-aos="zoom-in"
+                priority
             />
             <section id="" className="w-full md:max-w-6xl mx-auto grid grid-cols-12 place-items-center place-content-center gap-5 md:gap-0">
                 <Image

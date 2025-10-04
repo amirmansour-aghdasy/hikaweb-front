@@ -22,7 +22,7 @@ const MagPreviewSection = () => {
                     loop={true}
                     slidesPerView={1.3}
                     spaceBetween={25}
-                    // autoplay={true}
+                    autoplay={true}
                     centeredSlides={true}
                     breakpoints={{
                         1024: {
