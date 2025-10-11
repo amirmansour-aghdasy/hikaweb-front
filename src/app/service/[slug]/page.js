@@ -41,9 +41,9 @@ const SingleServiceDetailsPage = async ({ params }) => {
                 <title>خدمات ${title} - آژانس دیجیتال مارکتینگ هیکاوب</title>
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
             </Head>
-            <main className="w-full py-5 md:py-14 flex flex-col gap-10 md:gap-14 overflow-x-hidden md:overflow-x-visible" id={`${slug}-service-main-content`}>
+            <main className="w-full py-5 md:py-14 flex flex-col gap-10 md:gap-14 overflow-hidden md:overflow-visible" id={`${slug}-service-main-content`}>
                 <Image src={mainBanner} width={1346} height={298} sizes="100vw" className="w-full h-32 md:h-auto" alt={title} title={title} data-aos="zoom-in" priority />
-                <section className="w-full grid grid-cols-12 gap-7 place-items-center">
+                <section className="w-full grid grid-cols-12 gap-7 place-items-center overflow-hidden">
                     <div className="w-full col-span-12 md:col-span-5 flex flex-col gap-y-3.5">
                         <h2 className="w-full text-xl md:text-3xl text-slate-700 font-bold" data-aos="fade-left">
                             {firstSection?.content?.title && firstSection.content.title}
@@ -59,7 +59,7 @@ const SingleServiceDetailsPage = async ({ params }) => {
                         <PortfolioSlider order={firstSection?.slides && firstSection.slides.length} slides={firstSection?.slides && firstSection.slides} />
                     </div>
                 </section>
-                <section className="w-full grid grid-cols-12 gap-7 place-items-center">
+                <section className="w-full grid grid-cols-12 gap-7 place-items-center overflow-hidden">
                     <div className="w-full col-span-12 md:col-span-7 order-2 md:order-none" data-aos="zoom-in">
                         <PortfolioSlider order={secondSection?.slides && secondSection.slides.length} slides={secondSection?.slides && secondSection.slides} />
                     </div>
@@ -84,7 +84,11 @@ const SingleServiceDetailsPage = async ({ params }) => {
                             </h3>
                             <span className="flex w-full rounded h-0.5 bg-[#0E443C]" data-aos="fade-right"></span>
                         </div>
-                        <div className="w-full py-7 px-5 md:py-12 md:px-12 bg-[#0E443CB2] rounded-lg grid grid-cols-1 md:grid-cols-4 md:gap-x-12 gap-y-3.5 md:gap-y-7 mt-7 md:mt-14 relative" data-aos="zoom-in" data-aos-duration="1000">
+                        <div
+                            className="w-full py-7 px-5 md:py-12 md:px-12 bg-[#0E443CB2] rounded-lg grid grid-cols-1 md:grid-cols-4 md:gap-x-12 gap-y-3.5 md:gap-y-7 mt-7 md:mt-14 relative"
+                            data-aos="zoom-in"
+                            data-aos-duration="1000"
+                        >
                             {subServices?.map(({ iconSrc, text }, index) => (
                                 <div
                                     className="w-full rounded-md flex justify-start items-center gap-0 md:gap-3.5 bg-[#F1F1F1] shadow-md px-5 py-3.5 transition-all duration-300 ease-in-out hover:-translate-y-1.5 cursor-pointer"
@@ -114,8 +118,12 @@ const SingleServiceDetailsPage = async ({ params }) => {
                     <section className="w-full rounded-3xl bg-teal-500" id="installment-terms" data-aos="zoom-out" data-aos-duration="1000">
                         <div className="w-full h-full p-3.5 md:py-7 md:px-14 grid grid-cols-12 gap-y-10 md:gap-y-0 gap-x-0 md:gap-x-10 place-items-center justify-between">
                             <div className="w-full col-span-12 md:col-span-7 flex flex-col justify-center items-start gap-3.5 rounded-3xl bg-white p-3.5 md:px-12 md:py-7">
-                                <h2 className="w-full text-xl md:text-3xl font-bold text-slate-700" data-aos="fade-down">{finalDesc.content.title}</h2>
-                                <p className="w-full text-sm md:text-lg text-slate-700 leading-7 md:leading-8" data-aos="fade-up">{finalDesc.content.text}</p>
+                                <h2 className="w-full text-xl md:text-3xl font-bold text-slate-700" data-aos="fade-down">
+                                    {finalDesc.content.title}
+                                </h2>
+                                <p className="w-full text-sm md:text-lg text-slate-700 leading-7 md:leading-8" data-aos="fade-up">
+                                    {finalDesc.content.text}
+                                </p>
                             </div>
                             <div className="w-full col-span-12 grid place-items-center md:col-span-5" data-aos="zoom-in">
                                 <Image src={finalDesc.image} width="0" height="0" sizes="100vw" className="w-full md:w-auto h-auto" alt={finalDesc.content.title} title={finalDesc.content.title} />

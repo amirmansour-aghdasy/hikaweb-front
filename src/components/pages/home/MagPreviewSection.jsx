@@ -22,13 +22,13 @@ const MagPreviewSection = () => {
                     loop={true}
                     slidesPerView={1.3}
                     spaceBetween={25}
-                    autoplay={true}
+                    autoplay={{ pauseOnMouseEnter: true }}
                     centeredSlides={true}
                     breakpoints={{
                         1024: {
                             slidesPerView: 4,
                             spaceBetween: 15,
-                            centeredSlides: false
+                            centeredSlides: false,
                         },
                     }}
                     className="mySwiper4 w-full mt-5"

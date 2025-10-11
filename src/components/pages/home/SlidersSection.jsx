@@ -7,7 +7,7 @@ import { EffectCards, Autoplay } from "swiper/modules";
 const SlidersSection = () => {
     return (
         <section id="sliders-section" className="w-full grid grid-cols-12 lg:gap-x-10">
-            <div className="hidden md:flex col-span-12 w-full md:col-span-8" data-aos="fade-left">
+            <div className="col-span-12 w-full lg:col-span-8" data-aos="fade-left">
                 <Swiper
                     slidesPerView={1.3}
                     breakpoints={{
@@ -37,7 +37,7 @@ const SlidersSection = () => {
                     </SwiperSlide>
                 </Swiper>
             </div>
-            <div className="col-span-12 md:col-span-4 w-full h-auto md:h-80 relative" data-aos="fade-right">
+            <div className="hidden lg:flex col-span-12 lg:col-span-4 w-full h-auto md:h-80 relative" data-aos="fade-right">
                 <Swiper effect={"cards"} modules={[EffectCards, Autoplay]} autoplay={true} className="mySwiper2 w-11/12 mx-auto md:w-full h-full">
                     <SwiperSlide className="rounded-2xl overflow-hidden w-full">
                         <Image src="/assets/banners/small-slider-banner-2.webp" title="" alt="" width="0" height="0" sizes="100vw" className="w-full h-full" />

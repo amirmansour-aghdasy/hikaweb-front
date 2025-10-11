@@ -11,6 +11,7 @@ module.exports = {
             },
             animation: {
                 bgPulse: "bgPulse 7s ease-in-out infinite",
+                scroll: "scroll 40s linear infinite",
             },
             backgroundImage: {},
             container: {

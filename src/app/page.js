@@ -1,12 +1,28 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { info_preview } from "@/lib/constants";
+import { users_comment } from "@/__mocks__";
 import { AnimatedText } from "@/components/ui";
+import { info_preview } from "@/lib/constants";
 import { CounselingForm } from "@/components/forms";
-import { InfoPreviewCard } from "@/components/cards";
+import { InfoPreviewCard, CommentCard } from "@/components/cards";
 import { InstagramOutlined, RubikaFill, TelegramFill, WhatsAppOutlined } from "@/lib/icons";
-import { SlidersSection, CommentsSection, ServicesSection, MagPreviewSection, BrandsSliderSection } from "@/components/pages/home";
+import { SlidersSection, ServicesSection, MagPreviewSection } from "@/components/pages/home";
+
+const brands = [
+    "/assets/brands/brand-1.png",
+    "/assets/brands/brand-2.png",
+    "/assets/brands/brand-3.png",
+    "/assets/brands/brand-4.png",
+    "/assets/brands/brand-5.png",
+    "/assets/brands/brand-6.png",
+    "/assets/brands/brand-7.png",
+    "/assets/brands/brand-8.png",
+    "/assets/brands/brand-9.png",
+    "/assets/brands/brand-10.png",
+    "/assets/brands/brand-11.png",
+    "/assets/brands/brand-12.png",
+];
 
 const HomePage = () => {
     return (
@@ -73,7 +89,7 @@ const HomePage = () => {
                         ))}
                     </div>
                 </div>
-                <div className="col-span-12 md:col-span-6 order-1 md:order-2" data-aos="fade-right">
+                <div className="hidden md:flex col-span-12 md:col-span-6 order-1 md:order-2" data-aos="fade-right">
                     <Image src="/assets/images/intro-vector-1.png" title="" alt="" width="0" height="0" sizes="100vw" className="w-full md:w-10/12 mr-auto" />
                 </div>
             </section>
@@ -86,8 +102,57 @@ const HomePage = () => {
                     <Image src="/assets/banners/photographing-ad-banner.webp" width="0" height="0" alt="" title="" sizes="100vw" className="w-full h-auto" />
                 </Link>
             </section>
-            <BrandsSliderSection />
-            <CommentsSection />
+            <section id="home-page-brands-slider" className="w-full">
+                <h4
+                    className="text-lg relative font-bold flex items-center text-slate-700 before:content-[''] before:absolute before:-right-[2015px] before:w-[2000px] before:rounded-full before:h-1 before:bg-teal-100 after:content=[''] after:absolute after:w-[30px] after:h-1 after:bg-teal-500 after:rounded-full after:-right-[45px]"
+                    data-aos="fade-left"
+                >
+                    افتخار همکاری با بیش از 27 برند
+                </h4>
+
+                <div className="our-scrolling-ticker">
+                    <div className="scrolling-ticker-box relative flex overflow-hidden select-none gap-5 items-center">
+                        <div className="scrolling-content shrink-0 flex gap-3.5 md:gap-5 min-w-full animate-scroll py-5 md:py-10">
+                            {[...brands, ...brands].map((brand, index) => (
+                                <div
+                                    className="flex justify-center items-center h-auto rounded-2xl md:rounded-none md:shadow-none shadow-md py-2.5 px-11 md:p-0"
+                                    key={index}
+                                    data-aos="fade-up"
+                                    data-aos-delay={index * 150}
+                                >
+                                    <Image
+                                        src={brand}
+                                        width="0"
+                                        height="0"
+                                        sizes="100vw"
+                                        alt=""
+                                        className="w-full mx-auto h-32 grayscale hover:grayscale-0 trnasition-all duration-500 ease-in-out aspect-square object-contain"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="comments-section" className="w-full">
+                <h4
+                    className="text-lg relative font-bold flex items-center text-slate-700 before:content-[''] before:absolute before:-right-[2015px] before:w-[2000px] before:rounded-full before:h-1 before:bg-teal-100 after:content=[''] after:absolute after:w-[30px] after:h-1 after:bg-teal-500 after:rounded-full after:-right-[45px]"
+                    data-aos="fade-left"
+                >
+                    نظرات کاربران درباره هیکاوب
+                </h4>
+                <div className="our-scrolling-ticker">
+                    <div className="scrolling-ticker-box relative flex overflow-hidden select-none gap-5 items-center">
+                        <div className="scrolling-content shrink-0 flex gap-3.5 md:gap-5 min-w-full animate-scroll [animation-direction:reverse] py-5 md:py-10">
+                            {[...users_comment, ...users_comment].map((comment, index) => (
+                                <div key={index} className="w-80 md:w-96 shadow-md rounded-2xl overflow-hidden" data-aos="fade-up" data-aos-delay={index * 150}>
+                                    <CommentCard comment={comment} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
             <section
                 id="counseling"
                 className="w-full shadow-md rounded-2xl grid grid-cols-1 p-3.5 md:px-0 md:py-0 md:grid-cols-2 items-center gap-x-3.5 gap-y-7 md:gap-y-0 bg-counseling-img bg-cover h-auto md:h-[476px] bg-no-repeat bg-center relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:w-full before:h-full before:bg-slate-900/80"
@@ -103,7 +168,7 @@ const HomePage = () => {
                     >
                         با کامل نمودن این فرم درخواست مشاوره شما ثبت میگردد و همکاران ما در تایم اداری <br /> با شما تماس خواهند گرفت همینطور میتوانید از طریق پشتیبانی مجازی مشاوره <br /> دریافت کنید:
                     </p>
-                    <div className="flex items-center gap-x-7">
+                    <div className="flex items-center gap-x-7 mt-2 md:mt-0">
                         <a href="https://t.me/hikaweb" target="_blank" title="دریافت مشاوره در تلگرام" className="" data-aos="fade-up" data-aos-delay="0">
                             <TelegramFill className="bg-[#008987] rounded-xl p-2.5 w-full h-full resize" />
                         </a>

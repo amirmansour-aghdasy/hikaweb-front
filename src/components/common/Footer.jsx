@@ -77,16 +77,16 @@ const Footer = () => {
                     </a>
                 </div>
                 <div className="flex justify-center items-center gap-x-2 mx-auto">
-                    <a href="" className="p-2.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded-md group hover:-translate-y-1">
+                    <a href="https://www.instagram.com/hikaweb.ir/" target="_blank" className="p-2.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded-md group hover:-translate-y-1">
                         <BsInstagram className="text-xl text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
                     </a>
                     <a href="" className="p-2.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded-md group hover:-translate-y-1">
                         <FaLinkedinIn className="text-xl text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
                     </a>
-                    <a href="" className="p-2.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded-md group hover:-translate-y-1">
+                    <a href="https://wa.me/9120997935" target="_blank" title="دریافت مشاوره در واتس اپ" className="p-2.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded-md group hover:-translate-y-1">
                         <FaWhatsapp className="text-xl text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
                     </a>
-                    <a href="" className="p-2.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded-md group hover:-translate-y-1">
+                    <a href="https://t.me/hikaweb" target="_blank" title="دریافت مشاوره در تلگرام" className="p-2.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded-md group hover:-translate-y-1">
                         <FaTelegramPlane className="text-xl text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
                     </a>
                 </div>
