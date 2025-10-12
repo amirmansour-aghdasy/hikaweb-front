@@ -54,19 +54,19 @@ const OffCanvas = () => {
 
                     <Swiper className="w-full mySwiper9 mt-5" loop={true} autoplay={true} modules={[Autoplay]} slidesPerView={1.3} centeredSlides={true} spaceBetween={15}>
                         <SwiperSlide className="rounded-2xl overflow-hidden shadow-md">
-                            <Image src="/assets/banners/small-slider-banner-3.png" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
+                            <Image src="/assets/banners/small-slider-banner-1.webp" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
                         </SwiperSlide>
                         <SwiperSlide className="rounded-2xl overflow-hidden shadow-md">
-                            <Image src="/assets/banners/small-slider-banner-2.png" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
+                            <Image src="/assets/banners/small-slider-banner-2.webp" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
                         </SwiperSlide>
                         <SwiperSlide className="rounded-2xl overflow-hidden shadow-md">
-                            <Image src="/assets/banners/small-slider-banner-3.png" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
+                            <Image src="/assets/banners/small-slider-banner-1.webp" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
                         </SwiperSlide>
                         <SwiperSlide className="rounded-2xl overflow-hidden shadow-md">
-                            <Image src="/assets/banners/small-slider-banner-2.png" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
+                            <Image src="/assets/banners/small-slider-banner-1.webp" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
                         </SwiperSlide>
                         <SwiperSlide className="rounded-2xl overflow-hidden shadow-md">
-                            <Image src="/assets/banners/small-slider-banner-3.png" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
+                            <Image src="/assets/banners/small-slider-banner-2.webp" width="0" height="0" sizes="100vw" className="w-full" alt="" title="" />
                         </SwiperSlide>
                     </Swiper>
                     <nav id="mobile-menu" className="w-full h-96 px-3.5 mt-5">
@@ -115,17 +115,32 @@ const OffCanvas = () => {
                     </nav>
 
                     <div className="w-full absolute flex justify-center items-center gap-x-2.5 bottom-5 right-0">
-                        <a href="" className="p-1.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded group hover:-translate-y-1">
-                            <BsInstagram className="text-lg text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
+                        <a
+                            href="https://www.instagram.com/hikaweb.ir/"
+                            target="_blank"
+                            title="دریافت مشاوره در اینستاگرام"
+                            className="p-1.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded group hover:-translate-y-1"
+                        >
+                            <BsInstagram className="text-xl text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
                         </a>
                         <a href="" className="p-1.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded group hover:-translate-y-1">
-                            <FaLinkedinIn className="text-lg text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
+                            <FaLinkedinIn className="text-xl text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
                         </a>
                         <a href="" className="p-1.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded group hover:-translate-y-1">
-                            <FaWhatsapp className="text-lg text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
+                            <FaWhatsapp
+                                href="https://wa.me/9120997935"
+                                target="_blank"
+                                title="دریافت مشاوره در واتس اپ"
+                                className="text-xl text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out"
+                            />
                         </a>
-                        <a href="" className="p-1.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded group hover:-translate-y-1">
-                            <FaTelegramPlane className="text-lg text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
+                        <a
+                            href="https://t.me/hikaweb"
+                            target="_blank"
+                            title="دریافت مشاوره در تلگرام"
+                            className="p-1.5 bg-slate-700 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded group hover:-translate-y-1"
+                        >
+                            <FaTelegramPlane className="text-xl text-teal-500 group-hover:text-slate-100 transition-colors duration-300 ease-in-out" />
                         </a>
                     </div>
                 </DialogPanel>

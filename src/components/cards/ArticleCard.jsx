@@ -4,15 +4,18 @@ import Image from "next/image";
 import { useState } from "react";
 
 import toast from "react-hot-toast";
-import { MdEdit } from "react-icons/md";
 import { BsClock } from "react-icons/bs";
 import { TbArrowBackUp } from "react-icons/tb";
 import { GoShareAndroid } from "react-icons/go";
 import { MdOutlineArticle } from "react-icons/md";
 import { FiArrowRightCircle } from "react-icons/fi";
 
-const ArticleCard = ({ article: { title, description, thumbnail, createdAt, readTime } }) => {
+const ArticleCard = ({ article: { title, description, thumbnail, createdAt, readTime }, ...otherProps }) => {
     const [abstract, setAbstract] = useState(false);
+
+    const date = new Date(createdAt);
+    const day = new Intl.DateTimeFormat("fa-IR", { day: "numeric" }).format(date);
+    const month = new Intl.DateTimeFormat("fa-IR", { month: "long" }).format(date);
 
     const handleShare = async () => {
         if (navigator.share) {
@@ -30,7 +33,7 @@ const ArticleCard = ({ article: { title, description, thumbnail, createdAt, read
     };
 
     return (
-        <div className="relative p-2.5 rounded-2xl bg-white shadow-md">
+        <div className="relative p-2.5 rounded-2xl bg-white shadow-md" {...otherProps}>
             <div
                 className="
           absolute inset-0 rounded-2xl pointer-events-none
@@ -59,12 +62,12 @@ const ArticleCard = ({ article: { title, description, thumbnail, createdAt, read
                     <Image src={thumbnail} width="0" height="0" className="w-full h-44 rounded-2xl" sizes="100vw" alt={title} title={title} />
                     <div className="flex flex-col items-end gap-y-2.5 absolute top-2.5 left-2.5">
                         <button
-                            className={`flex items-center gap-1 left-2.5 px-1.5 py-1 rounded-md transition-all duration-300 ease-in-out border text-[10px] md:text-xs cursor-pointer ${
+                            className={`flex items-center gap-1 left-2.5 px-1.5 py-1 rounded-md transition-all duration-300 ease-in-out border text-xs md:text-xs cursor-pointer ${
                                 abstract ? "bg-transparent text-white border-teal-500" : "bg-white text-teal-800 border-transparent"
                             }`}
                             onClick={() => setAbstract((prevState) => !prevState)}
                         >
-                            {abstract ? <TbArrowBackUp className="size-4" /> : <MdOutlineArticle className="size-4" />}
+                            {abstract ? <TbArrowBackUp className="size-5" /> : <MdOutlineArticle className="size-5" />}
                             {abstract ? "کاور مقاله" : "چکیده مقاله"}
                         </button>
                         <button
@@ -73,24 +76,24 @@ const ArticleCard = ({ article: { title, description, thumbnail, createdAt, read
                                 abstract ? "bg-transparent text-white border-teal-500" : "bg-white text-teal-800"
                             } transition-all duration-300 ease-in-out rounded-md p-1.5 cursor-pointer`}
                         >
-                            <GoShareAndroid className="size-4" />
+                            <GoShareAndroid className="size-5" />
                         </button>
                     </div>
                     <div className={`absolute w-10/12 flex flex-col gap-y-2.5 items-start transition-opacity duration-300 ease-in-out ${abstract ? "opacity-100" : "opacity-0"}`}>
                         <h3 className="text-base md:text-lg lg:text-xl lg:font-bold w-10/12 truncate text-white">{title}</h3>
                         <p className={`text-white`}>{description}</p>
                     </div>
+                    <div className="rounded-full text-sm w-14 h-14 absolute left-5 bottom-0 translate-y-1/2 bg-gradient-to-b from-[#008987] via-[#00C3C1] to-[#00DAD7] text-white flex flex-col items-center justify-center text-center font-bold">
+                        <span>{day}</span>
+                        <span>{month}</span>
+                    </div>
                 </div>
-                <div className="w-full flex flex-col mt-2.5 gap-3.5">
+                <div className="w-full flex flex-col mt-5 gap-5">
                     <Link href="" title="" className="text-base md:text-lg lg:text-xl lg:font-bold w-10/12 truncate text-teal-900">
                         {title}
                     </Link>
 
-                    <div className="w-full flex items-center justify-between mt-2.5 text-[10px] md:text-xs text-slate-500 gap-x-1.5 sm:gap-x-3.5">
-                        <span className="flex items-center mb-0.5 gap-1 text-slate-400 text-xs sm:text-sm cursor-default">
-                            <MdEdit className="size-4" />
-                            {new Date(createdAt).toLocaleDateString("fa-IR")}
-                        </span>
+                    <div className="w-full flex items-center justify-between md:text-xs text-slate-500 gap-x-1.5 sm:gap-x-3.5">
                         <span className="flex items-center ml-auto mb-0.5 gap-1 text-slate-400 text-xs sm:text-sm cursor-default">
                             <BsClock className="size-4" />
                             {readTime}

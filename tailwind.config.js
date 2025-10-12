@@ -23,6 +23,7 @@ module.exports = {
             },
             backgroundImage: {
                 "counseling-img": "url('/assets/images/counseling-bg.png')",
+                "mag-landing": "url('/assets/images/mag-landing.webp')",
             },
             boxShadow: {
                 "inner-2": "inset 0 8px 10px 0 rgb(0 0 0 / 0.28)",

@@ -51,7 +51,7 @@ const SingleServiceDetailsPage = async ({ params }) => {
                         <p className="w-full p-5 rounded-lg text-xs md:text-base bg-slate-100 text-slate-700 leading-6" data-aos="zoom-in">
                             {firstSection?.content?.description && firstSection.content.description}
                         </p>
-                        <button className="flex justify-center w-6/12 ml-auto rounded-md font-bold text-sm md:text-base py-2 md:py-2.5 bg-teal-900 text-white" data-aos="fade-right">
+                        <button className="flex justify-center w-6/12 mx-auto rounded-md font-bold text-sm md:text-base py-2 md:py-2.5 bg-teal-900 text-white" data-aos="fade-right">
                             {firstSection?.content?.actionBtnText && firstSection.content.actionBtnText}
                         </button>
                     </div>
@@ -70,7 +70,7 @@ const SingleServiceDetailsPage = async ({ params }) => {
                         <p className="w-full p-5 rounded-lg text-xs md:text-base bg-slate-100 text-slate-700 leading-6" data-aos="zoom-out">
                             {secondSection?.content?.description && secondSection.content.description}
                         </p>
-                        <button className="flex justify-center w-6/12 ml-auto rounded-md font-bold text-sm md:text-base py-2 md:py-2.5 bg-teal-900 text-white" data-aos="fade-left">
+                        <button className="flex justify-center w-6/12 mx-auto rounded-md font-bold text-sm md:text-base py-2 md:py-2.5 bg-teal-900 text-white" data-aos="fade-left">
                             {secondSection?.content?.actionBtnText && secondSection.content.actionBtnText}
                         </button>
                     </div>

@@ -40,13 +40,13 @@ const SlidersSection = () => {
             <div className="hidden lg:flex col-span-12 lg:col-span-4 w-full h-auto md:h-80 relative" data-aos="fade-right">
                 <Swiper effect={"cards"} modules={[EffectCards, Autoplay]} autoplay={true} className="mySwiper2 w-11/12 mx-auto md:w-full h-full">
                     <SwiperSlide className="rounded-2xl overflow-hidden w-full">
-                        <Image src="/assets/banners/small-slider-banner-2.webp" title="" alt="" width="0" height="0" sizes="100vw" className="w-full h-full" />
-                    </SwiperSlide>
-                    <SwiperSlide className="rounded-2xl overflow-hidden w-full">
-                        <Image src="/assets/banners/small-slider-banner-3.webp" title="" alt="" width="0" height="0" sizes="100vw" className="w-full h-full" />
+                        <Image src="/assets/banners/small-slider-banner-1.webp" title="" alt="" width="0" height="0" sizes="100vw" className="w-full h-full" />
                     </SwiperSlide>
                     <SwiperSlide className="rounded-2xl overflow-hidden w-full">
                         <Image src="/assets/banners/small-slider-banner-2.webp" title="" alt="" width="0" height="0" sizes="100vw" className="w-full h-full" />
+                    </SwiperSlide>
+                    <SwiperSlide className="rounded-2xl overflow-hidden w-full">
+                        <Image src="/assets/banners/small-slider-banner-1.webp" title="" alt="" width="0" height="0" sizes="100vw" className="w-full h-full" />
                     </SwiperSlide>
                 </Swiper>
             </div>
