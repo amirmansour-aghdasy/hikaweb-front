@@ -74,8 +74,8 @@ const Navbar = () => {
             </div>
 
             <div className="w-auto flex items-center gap-x-1.5 sm:gap-x-3.5">
-                <ToggleLanguageButton />
-                <ToggleThemeMode />
+                {/* <ToggleLanguageButton />
+                <ToggleThemeMode /> */}
                 <AuthActionButton />
             </div>
         </nav>

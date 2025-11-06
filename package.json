@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
+    "@microsoft/clarity": "^1.0.0",
     "@reduxjs/toolkit": "^2.2.7",
     "aos": "^2.3.4",
     "autoprefixer": "10.4.20",

@@ -27,6 +27,6 @@ export const navbarItems = [
     },
     {
         title: "هیکا مگ",
-        url: "mag",
+        url: "/mag",
     },
 ];

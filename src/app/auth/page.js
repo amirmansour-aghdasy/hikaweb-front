@@ -8,7 +8,7 @@ import { HiMiniDevicePhoneMobile } from "react-icons/hi2";
 import Image from "next/image";
 
 export default function LoginPage() {
-    const [step, setStep] = useState("phone"); // phone | code
+    const [step, setStep] = useState("phoneNumber"); // phoneNumber | code
     const [phone, setPhone] = useState("");
     const [code, setCode] = useState("");
 
@@ -16,7 +16,7 @@ export default function LoginPage() {
         const res = await fetch("http://localhost:4000/send-otp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phone }),
+            body: JSON.stringify({ phoneNumber }),
         });
         if (res.ok) {
             setStep("code");
@@ -26,7 +26,7 @@ export default function LoginPage() {
 
     const verifyOtp = async () => {
         await signIn("sms-otp", {
-            phone,
+            phoneNumber,
             code,
             redirect: true,
             callbackUrl: "/dashboard",
