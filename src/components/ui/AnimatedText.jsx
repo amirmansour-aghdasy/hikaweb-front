@@ -2,10 +2,10 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 
-import * as RT from "react-typed";
+import { ReactTyped } from "react-typed";
 
 // resilient import
-const TypedComp = RT.ReactTyped || RT.default || RT.Typed || null;
+const TypedComp = ReactTyped || null;
 
 const AnimatedText = ({
   strings = [],

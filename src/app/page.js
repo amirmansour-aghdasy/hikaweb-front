@@ -1,30 +1,105 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { users_comment } from "@/__mocks__";
+import { serverGet } from "@/lib/api/server";
 import { AnimatedText } from "@/components/ui";
 import { info_preview } from "@/lib/constants";
 import { CounselingForm } from "@/components/forms";
 import { InfoPreviewCard, CommentCard } from "@/components/cards";
 import { InstagramOutlined, RubikaFill, TelegramFill, WhatsAppOutlined } from "@/lib/icons";
-import { SlidersSection, ServicesSection, MagPreviewSection } from "@/components/pages/home";
+import dynamic from "next/dynamic";
+import { defaultMetadata } from "@/lib/seo";
 
-const brands = [
-    "/assets/brands/brand-1.png",
-    "/assets/brands/brand-2.png",
-    "/assets/brands/brand-3.png",
-    "/assets/brands/brand-4.png",
-    "/assets/brands/brand-5.png",
-    "/assets/brands/brand-6.png",
-    "/assets/brands/brand-7.png",
-    "/assets/brands/brand-8.png",
-    "/assets/brands/brand-9.png",
-    "/assets/brands/brand-10.png",
-    "/assets/brands/brand-11.png",
-    "/assets/brands/brand-12.png",
-];
+// Lazy load heavy components
+const SlidersSection = dynamic(() => import("@/components/pages/home").then(mod => mod.SlidersSection), {
+    loading: () => <div className="w-full h-64 bg-slate-100 animate-pulse rounded-2xl" />,
+    ssr: true,
+});
 
-const HomePage = () => {
+const ServicesSection = dynamic(() => import("@/components/pages/home").then(mod => mod.ServicesSection), {
+    loading: () => <div className="w-full h-48 bg-slate-100 animate-pulse rounded-2xl" />,
+    ssr: true,
+});
+
+const MagPreviewSection = dynamic(() => import("@/components/pages/home").then(mod => mod.MagPreviewSection), {
+    loading: () => <div className="w-full h-48 bg-slate-100 animate-pulse rounded-2xl" />,
+    ssr: true,
+});
+
+const BrandsSection = dynamic(() => import("@/components/pages/home/BrandsSection"), {
+    loading: () => <div className="w-full h-32 bg-slate-100 animate-pulse rounded-2xl" />,
+    ssr: true,
+});
+
+export const metadata = {
+    title: defaultMetadata.title.fa,
+    description: defaultMetadata.description.fa,
+    keywords: defaultMetadata.keywords.fa.join(", "),
+    openGraph: {
+        title: defaultMetadata.title.fa,
+        description: defaultMetadata.description.fa,
+        url: defaultMetadata.siteUrl,
+        siteName: defaultMetadata.siteName,
+        images: [
+            {
+                url: `${defaultMetadata.siteUrl}/assets/logo/large-logo-text.png`,
+                width: 1200,
+                height: 630,
+                alt: "هیکاوب",
+            },
+        ],
+        locale: "fa_IR",
+        type: "website",
+    },
+    alternates: {
+        canonical: defaultMetadata.siteUrl,
+    },
+};
+
+const HomePage = async () => {
+    // Fetch user comments from API (optional - will use fallback if fails)
+    // Note: Comments endpoint requires referenceType and referenceId
+    // We'll skip this for now as we don't have a specific reference
+    let users_comment = [];
+
+    // Fetch featured articles for MagPreviewSection
+    let featuredArticles = [];
+    try {
+        const featuredResponse = await serverGet('/articles/featured?limit=6');
+        featuredArticles = (featuredResponse.data?.articles || []).map(article => ({
+            id: article._id,
+            _id: article._id,
+            title: article.title?.fa || article.title,
+            description: article.excerpt?.fa || article.shortDescription?.fa || "",
+            thumbnail: article.featuredImage || "/assets/images/post-thumb-1.webp",
+            createdAt: article.publishedAt || article.createdAt,
+            readTime: `${article.readTime || 5} دقیقه`,
+            slug: article.slug?.fa || article.slug?.en || article.slug,
+            article
+        }));
+    } catch (error) {
+        console.error("Error fetching featured articles:", error);
+    }
+
+    // Fetch services for ServicesSection
+    let services = [];
+    try {
+        const servicesResponse = await serverGet('/services?status=active&limit=50');
+        services = servicesResponse.data || [];
+    } catch (error) {
+        console.error("Error fetching services:", error);
+    }
+
+    // Fetch brands for BrandsSection (using featured endpoint which is public)
+    let brands = [];
+    try {
+        const brandsResponse = await serverGet('/brands/featured?limit=50');
+        brands = (brandsResponse.data || []).map(brand => brand.logo || "/assets/brands/brand-1.png");
+    } catch (error) {
+        // Silently fail - fallback brands will be used
+        // This is optional data
+    }
+
     return (
         <main className="w-full flex flex-col gap-10 mb-5 md:my-14 overflow-x-hidden md:overflow-x-visible" id="home-page-main">
             <SlidersSection />
@@ -33,7 +108,7 @@ const HomePage = () => {
                     <h1 className="text-2xl md:text-4xl text-teal-500 font-bold" data-aos="fade-up">
                         <AnimatedText strings={["آژانس دیجیتال مارکتینگ هیکاوب"]} typeSpeed={60} loop={false} startDelay={1500} hideCursorOnEnd={true} />
                     </h1>
-                    <h3 className="text-sm md:text-lg text-slate-700 mt-1.5 font-semibold h-10 md:h-auto" data-aos="fade-down">
+                    <h3 className="text-sm md:text-lg text-slate-700 dark:text-slate-300 mt-1.5 font-semibold h-10 md:h-auto" data-aos="fade-down">
                         کیفیت امری تبلیغاتی نیست میکوشیم در{" "}
                         <AnimatedText
                             strings={[
@@ -78,7 +153,7 @@ const HomePage = () => {
                         />{" "}
                         آن را اثبات کنیم.
                     </h3>
-                    <p className="text-xs md:text-base text-slate-500 leading-relaxed mt-3.5 md:mt-2" data-aos="fade-left">
+                    <p className="text-xs md:text-base text-slate-500 dark:text-slate-400 leading-relaxed mt-3.5 md:mt-2" data-aos="fade-left">
                         آژانس دیجیتال مارکتینگ هیکاوب با 4 سال سابقه فعالیت در زمینه تبلیغات و مدیریت کسب و کار و یک تیم مجرب و متخصص به دنبال توسعه و پیشرفت در کسب و کار شماست. تیم ما تشکیل شده از
                         طراحان وبسایت مجرب و چندین گرافیست و تدوین گر و برنامه نویسان با سابقه است . هیکاوب تا کنون با بیش از 25 کسب و کار همکاری داشته و در زمینه های مختلف مارکتینگ تلاش خودرا برای
                         ارتقای کسب و کار ها کرده است.
@@ -93,7 +168,7 @@ const HomePage = () => {
                     <Image src="/assets/images/intro-vector-1.png" title="" alt="" width="0" height="0" sizes="100vw" className="w-full md:w-10/12 mr-auto" />
                 </div>
             </section>
-            <ServicesSection />
+            <ServicesSection services={services} />
             <section id="home-page-banners" className="w-full grid grid-cols-1 md:grid-cols-2 place-items-center gap-5">
                 <Link href="/service/logo-design" className="w-full rounded-2xl overflow-hidden shadow-md" data-aos="fade-left">
                     <Image src="/assets/banners/logo-ad-banner.webp" width="0" height="0" alt="" title="" sizes="100vw" className="w-full h-auto" />
@@ -102,57 +177,28 @@ const HomePage = () => {
                     <Image src="/assets/banners/photographing-ad-banner.webp" width="0" height="0" alt="" title="" sizes="100vw" className="w-full h-auto" />
                 </Link>
             </section>
-            <section id="home-page-brands-slider" className="w-full">
-                <h4
-                    className="text-lg relative font-bold flex items-center text-slate-700 before:content-[''] before:absolute before:-right-[2015px] before:w-[2000px] before:rounded-full before:h-1 before:bg-teal-100 after:content=[''] after:absolute after:w-[30px] after:h-1 after:bg-teal-500 after:rounded-full after:-right-[45px]"
-                    data-aos="fade-left"
-                >
-                    افتخار همکاری با بیش از 27 برند
-                </h4>
-
-                <div className="our-scrolling-ticker">
-                    <div className="scrolling-ticker-box relative flex overflow-hidden select-none gap-5 items-center">
-                        <div className="scrolling-content shrink-0 flex gap-3.5 md:gap-5 min-w-full animate-scroll py-5 md:py-10">
-                            {[...brands, ...brands].map((brand, index) => (
-                                <div
-                                    className="flex justify-center items-center h-auto rounded-2xl md:rounded-none md:shadow-none shadow-md py-2.5 px-11 md:p-0"
-                                    key={index}
-                                    data-aos="fade-up"
-                                    data-aos-delay={index * 150}
-                                >
-                                    <Image
-                                        src={brand}
-                                        width="0"
-                                        height="0"
-                                        sizes="100vw"
-                                        alt=""
-                                        className="w-full mx-auto h-32 grayscale hover:grayscale-0 trnasition-all duration-500 ease-in-out aspect-square object-contain"
-                                    />
-                                </div>
-                            ))}
+            <BrandsSection brands={brands} />
+            {users_comment.length > 0 && (
+                <section id="comments-section" className="w-full">
+                    <h4
+                        className="text-lg relative font-bold flex items-center text-slate-700 dark:text-slate-200 before:content-[''] before:absolute before:-right-[2015px] before:w-[2000px] before:rounded-full before:h-1 before:bg-teal-100 dark:before:bg-teal-900/30 after:content=[''] after:absolute after:w-[30px] after:h-1 after:bg-teal-500 dark:after:bg-teal-600 after:rounded-full after:-right-[45px]"
+                        data-aos="fade-left"
+                    >
+                        نظرات کاربران درباره هیکاوب
+                    </h4>
+                    <div className="our-scrolling-ticker">
+                        <div className="scrolling-ticker-box relative flex overflow-hidden select-none gap-5 items-center">
+                            <div className="scrolling-content shrink-0 flex gap-3.5 md:gap-5 min-w-full animate-scroll [animation-direction:reverse] py-5 md:py-10">
+                                {[...users_comment, ...users_comment].map((comment, index) => (
+                                    <div key={index} className="w-80 md:w-96 shadow-md rounded-2xl overflow-hidden" data-aos="fade-up" data-aos-delay={index * 150}>
+                                        <CommentCard comment={comment} />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
-            <section id="comments-section" className="w-full">
-                <h4
-                    className="text-lg relative font-bold flex items-center text-slate-700 before:content-[''] before:absolute before:-right-[2015px] before:w-[2000px] before:rounded-full before:h-1 before:bg-teal-100 after:content=[''] after:absolute after:w-[30px] after:h-1 after:bg-teal-500 after:rounded-full after:-right-[45px]"
-                    data-aos="fade-left"
-                >
-                    نظرات کاربران درباره هیکاوب
-                </h4>
-                <div className="our-scrolling-ticker">
-                    <div className="scrolling-ticker-box relative flex overflow-hidden select-none gap-5 items-center">
-                        <div className="scrolling-content shrink-0 flex gap-3.5 md:gap-5 min-w-full animate-scroll [animation-direction:reverse] py-5 md:py-10">
-                            {[...users_comment, ...users_comment].map((comment, index) => (
-                                <div key={index} className="w-80 md:w-96 shadow-md rounded-2xl overflow-hidden" data-aos="fade-up" data-aos-delay={index * 150}>
-                                    <CommentCard comment={comment} />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
+                </section>
+            )}
             <section
                 id="counseling"
                 className="w-full shadow-md rounded-2xl grid grid-cols-1 p-3.5 md:px-0 md:py-0 md:grid-cols-2 items-center gap-x-3.5 gap-y-7 md:gap-y-0 bg-counseling-img bg-cover h-auto md:h-[476px] bg-no-repeat bg-center relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:w-full before:h-full before:bg-slate-900/80"
@@ -187,7 +233,7 @@ const HomePage = () => {
                     <CounselingForm />
                 </div>
             </section>
-            <MagPreviewSection />
+            <MagPreviewSection articles={featuredArticles} />
         </main>
     );
 };

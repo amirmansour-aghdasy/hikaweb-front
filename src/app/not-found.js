@@ -1,6 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 
+export const metadata = {
+    title: "404 - صفحه یافت نشد | هیکاوب",
+    description: "صفحه مورد نظر یافت نشد",
+    robots: "noindex, nofollow",
+};
+
 export default function NotFound() {
     return (
         <div className="flex flex-col items-center gap-3.5 py-10">

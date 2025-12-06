@@ -2,6 +2,22 @@ import Image from "next/image";
 
 import { ContactUsForm } from "@/components/forms";
 import { CallCallingFill, InstagramOutlined, LocationFill, RubikaFill, TelegramFill, WhatsAppOutlined } from "@/lib/icons";
+import { defaultMetadata } from "@/lib/seo";
+
+export const metadata = {
+    title: "تماس با ما | هیکاوب",
+    description: "برای ارتباط با تیم هیکاوب و دریافت مشاوره رایگان، با ما تماس بگیرید. آدرس: تهران، بزرگراه اشرفی اصفهانی، محمدی (محله‌ی مرزداران)",
+    keywords: "تماس با هیکاوب, آدرس هیکاوب, شماره تماس هیکاوب, مشاوره رایگان",
+    openGraph: {
+        title: "تماس با ما | هیکاوب",
+        description: "برای ارتباط با تیم هیکاوب و دریافت مشاوره رایگان، با ما تماس بگیرید",
+        url: `${defaultMetadata.siteUrl}/contact-us`,
+        type: "website",
+    },
+    alternates: {
+        canonical: `${defaultMetadata.siteUrl}/contact-us`,
+    },
+};
 
 const ContactUsPage = () => {
     return (
@@ -11,7 +27,7 @@ const ContactUsPage = () => {
                 <div className="w-full flex flex-1 col-span-12 md:col-span-4">
                     <ContactUsForm />
                 </div>
-                <div className="w-full flex-1 col-span-12 md:col-span-8 bg-[#A5D1D1] rounded-2xl p-3.5 flex flex-col items-center justify-between gap-3.5">
+                <div className="w-full flex-1 col-span-12 md:col-span-8 bg-[#A5D1D1] dark:bg-teal-900/30 rounded-2xl p-3.5 flex flex-col items-center justify-between gap-3.5">
                     <div className="w-full h-72 rounded-2xl overflow-hidden" data-aos="zoom-out">
                         <iframe
                             className="w-full h-full"
@@ -25,26 +41,26 @@ const ContactUsPage = () => {
                         ></iframe>
                     </div>
                     <div className="w-full">
-                        <p className="w-full flex items-center gap-2 md:gap-2.5 text-[#0E443C] text-sm md:text-xl font-bold md:font-normal p-2.5 bg-[#F5F5F5] shadow rounded-xl" data-aos="zoom-in">
+                        <p className="w-full flex items-center gap-2 md:gap-2.5 text-[#0E443C] dark:text-teal-100 text-sm md:text-xl font-bold md:font-normal p-2.5 bg-[#F5F5F5] dark:bg-slate-800 shadow rounded-xl" data-aos="zoom-in">
                             <LocationFill className="size-6 md:size-8" />
                             تهران، بزرگراه اشرفی اصفهانی، محمدی (محله‌ی مرزداران)
                         </p>
-                        <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-3.5 bg-[#F5F5F5] p-2.5 rounded-xl mt-3.5" data-aos="zoom-out">
-                            <a href="tel:09120997935" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] cursor-pointer">
+                        <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-3.5 bg-[#F5F5F5] dark:bg-slate-800 p-2.5 rounded-xl mt-3.5" data-aos="zoom-out">
+                            <a href="tel:09120997935" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] dark:text-slate-200 cursor-pointer hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
                                 09120997935
-                                <CallCallingFill className="text-[#008987] size-5 md:size-8" />
+                                <CallCallingFill className="text-[#008987] dark:text-teal-400 size-5 md:size-8" />
                             </a>
-                            <a href="tel:09191393479" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] cursor-pointer">
+                            <a href="tel:09191393479" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] dark:text-slate-200 cursor-pointer hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
                                 09191393479
-                                <CallCallingFill className="text-[#008987] size-5 md:size-8" />
+                                <CallCallingFill className="text-[#008987] dark:text-teal-400 size-5 md:size-8" />
                             </a>
-                            <a href="tel:02144276519" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] cursor-pointer">
+                            <a href="tel:02144276519" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] dark:text-slate-200 cursor-pointer hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
                                 02144276519
-                                <CallCallingFill className="text-[#008987] size-5 md:size-8" />
+                                <CallCallingFill className="text-[#008987] dark:text-teal-400 size-5 md:size-8" />
                             </a>
-                            <a href="tel:02144277208" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] cursor-pointer">
+                            <a href="tel:02144277208" className="w-full flex justify-center items-center text-sm md:text-xl font-bold md:font-normal gap-x-1.5 text-[#0E443C] dark:text-slate-200 cursor-pointer hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
                                 02144277208
-                                <CallCallingFill className="text-[#008987] size-5 md:size-8" />
+                                <CallCallingFill className="text-[#008987] dark:text-teal-400 size-5 md:size-8" />
                             </a>
                         </div>
                     </div>

@@ -1,84 +1,308 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { signIn } from "next-auth/react";
-import { FaGithub, FaGoogle, FaLinkedinIn } from "react-icons/fa6";
+import { FaGoogle, FaLinkedinIn } from "react-icons/fa6";
 import { HiMiniDevicePhoneMobile } from "react-icons/hi2";
 import Image from "next/image";
+import toast from "react-hot-toast";
+
+import useAuthStore from "@/lib/store/authStore";
+import { validatePhoneNumber, validateEmail } from "@/lib/utils/sanitize";
+import OTPInput from "@/components/forms/OTPInput";
 
 export default function LoginPage() {
-    const [step, setStep] = useState("phoneNumber"); // phoneNumber | code
-    const [phone, setPhone] = useState("");
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirect = searchParams.get("redirect") || "/profile";
+    
+    const { sendOTP, verifyOTP, checkUserType, oauthLogin, isLoading, isAuthenticated } = useAuthStore();
+    
+    const [step, setStep] = useState("phoneNumber"); // phoneNumber | code | register
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [code, setCode] = useState("");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [userType, setUserType] = useState(null); // 'existing' | 'new'
+    const isSubmittingRef = useRef(false);
+    const [otpSentTime, setOtpSentTime] = useState(null);
+    const [resendCooldown, setResendCooldown] = useState(0);
 
-    const sendOtp = async () => {
-        const res = await fetch("http://localhost:4000/send-otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phoneNumber }),
-        });
-        if (res.ok) {
+    useEffect(() => {
+        if (isAuthenticated) {
+            // Add a small delay to ensure state is fully updated
+            const timer = setTimeout(() => {
+                router.push(redirect);
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [isAuthenticated, router, redirect]);
+
+    const handleSendOTP = async (e) => {
+        e.preventDefault();
+        
+        if (!validatePhoneNumber(phoneNumber)) {
+            toast.error("لطفاً شماره موبایل معتبر وارد کنید (مثال: 09123456789)");
+            return;
+        }
+
+        try {
+            // Check if user exists
+            const userCheck = await checkUserType(phoneNumber);
+            const exists = userCheck?.exists ?? userCheck?.data?.exists ?? false;
+            const userTypeValue = exists ? "existing" : "new";
+            setUserType(userTypeValue);
+            
+            // Clear name and email if existing user
+            if (exists) {
+                setName("");
+                setEmail("");
+            }
+            
+            // Send OTP
+            await sendOTP(phoneNumber);
             setStep("code");
-            alert("کد ارسال شد");
+            // Reset submission flag when moving to code step
+            isSubmittingRef.current = false;
+            // Set OTP sent time for resend cooldown
+            setOtpSentTime(Date.now());
+            setResendCooldown(120); // 2 minutes cooldown
+        } catch (error) {
+            console.error("Error sending OTP:", error);
+            // On error, assume new user
+            setUserType("new");
         }
     };
 
-    const verifyOtp = async () => {
-        await signIn("sms-otp", {
-            phoneNumber,
-            code,
-            redirect: true,
-            callbackUrl: "/dashboard",
-        });
+    const handleVerifyOTP = async (e, otpCode = null) => {
+        // Prevent double submission
+        if (isSubmittingRef.current || isLoading) {
+            return;
+        }
+
+        // Allow calling without event (for auto-submit)
+        if (e) {
+            e.preventDefault();
+        }
+        
+        // Use provided code or state code
+        const codeToVerify = otpCode || code;
+        
+        if (!codeToVerify || codeToVerify.length !== 6) {
+            toast.error("لطفاً کد تأیید 6 رقمی را وارد کنید");
+            return;
+        }
+
+        try {
+            isSubmittingRef.current = true;
+            // Only send additionalData for new users
+            const additionalData = userType === "new" ? { name: name.trim(), email: email.trim() } : {};
+            await verifyOTP(phoneNumber, codeToVerify, additionalData);
+            
+            // Redirect will happen automatically via useEffect when isAuthenticated changes
+            // No need to manually redirect here
+        } catch (error) {
+            console.error("Error verifying OTP:", error);
+            // Reset code and submission flag on error
+            setCode("");
+            isSubmittingRef.current = false;
+            // Reset OTP input submission flag by clearing and setting code
+            setTimeout(() => {
+                setCode("");
+            }, 100);
+        }
     };
 
+    const handleOAuthLogin = (provider) => {
+        oauthLogin(provider);
+    };
+
+    // Resend OTP handler
+    const handleResendOTP = async () => {
+        if (resendCooldown > 0 || isLoading) {
+            return;
+        }
+
+        try {
+            await sendOTP(phoneNumber);
+            setOtpSentTime(Date.now());
+            setResendCooldown(120); // Reset to 2 minutes
+            setCode(""); // Clear current code
+        } catch (error) {
+            console.error("Error resending OTP:", error);
+        }
+    };
+
+    // Resend cooldown timer
+    useEffect(() => {
+        if (resendCooldown > 0) {
+            const timer = setInterval(() => {
+                setResendCooldown((prev) => {
+                    if (prev <= 1) {
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(timer);
+        }
+    }, [resendCooldown]);
+
     return (
-        <div className="relative w-full max-w-4xl h-[550px] mx-auto bg-white m-5 rounded-3xl shadow-lg overflow-hidden">
-            <div className="absolute right-0 w-1/2 h-full z-[1] bg-white flex items-center text-gray-800 text-center p-10 placeholder:text-right transition-[all,visibility] duration-[600ms] ease-in-out delay-[1200ms] [transition:visibility_0s_1s] max-[650px]:bottom-0 max-[650px]:w-full max-[650px]:h-[70%]">
-                <form className="w-full" onSubmit={() => {}}>
-                    <h1 className="text-4xl -mt-2 text-slate-700" data-aos="fade-down">
-                        ورود و ثبت نام
-                    </h1>
-                    <div className="relative my-[30px]" data-aos="fade-left">
-                        <input
-                            type="text"
-                            inputMode="tel"
-                            placeholder="شماره همراه"
-                            autoComplete="false"
-                            autoCorrect="false"
-                            autoFocus="true"
-                            className="w-full py-3 pr-12 pl-[20px] bg-slate-200 rounded-lg border-none outline-none text-base text-slate-500 font-medium placeholder:text-[#888] placeholder:font-normal placeholder:text-right text-left"
-                        />
-                        <HiMiniDevicePhoneMobile className="bx bxs-user absolute right-5 top-1/2 -translate-y-1/2 text-xl text-[#888]" />
-                    </div>
-                    <button
-                        data-aos="fade-right"
-                        type="submit"
-                        className="w-full h-12 bg-teal-500 hover:bg-teal-600 transition-all duration-300 ease-in-out rounded-[8px] shadow-[0_0_10px_rgba(0,0,0,0.1)] text-white font-semibold text-[16px]"
-                    >
-                        ارسال
-                    </button>
-                    <p className="text-[14.5px] my-[15px] text-slate-500" data-aos="zoom-in">
-                        یا ورود با حساب های
-                    </p>
-                    <div className="flex justify-center">
-                        <span
-                            data-aos="fade-up"
-                            data-aos-delay="0"
-                            className="inline-flex p-2 border-2 border-slate-500 hover:border-teal-500 rounded-[8px] text-base text-slate-700 hover:text-teal-700 transition-all duration-300 ease-in-out mx-2 cursor-pointer"
+        <div className="relative w-full max-w-4xl h-auto min-h-[550px] mx-auto bg-white dark:bg-slate-800 m-5 rounded-3xl shadow-lg overflow-hidden transition-colors duration-300">
+            <div className="absolute right-0 w-1/2 h-full z-[1] bg-white dark:bg-slate-800 flex items-center text-gray-800 dark:text-gray-200 text-center p-10 placeholder:text-right transition-[all,visibility] duration-[600ms] ease-in-out delay-[1200ms] [transition:visibility_0s_1s] max-[650px]:bottom-0 max-[650px]:w-full max-[650px]:h-[70%]">
+                {step === "phoneNumber" && (
+                    <form className="w-full" onSubmit={handleSendOTP}>
+                        <h1 className="text-4xl -mt-2 text-slate-700 dark:text-slate-200" data-aos="fade-down">
+                            ورود و ثبت نام
+                        </h1>
+                        <div className="relative my-[30px]" data-aos="fade-left">
+                            <input
+                                type="tel"
+                                inputMode="tel"
+                                placeholder="شماره همراه"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                autoComplete="tel"
+                                autoFocus={true}
+                                className="w-full py-3 pr-12 pl-[20px] bg-slate-200 dark:bg-slate-700 rounded-lg border-none outline-none text-base text-slate-500 dark:text-slate-300 font-medium placeholder:text-[#888] dark:placeholder:text-slate-500 placeholder:font-normal placeholder:text-right text-left"
+                                required
+                            />
+                            <HiMiniDevicePhoneMobile className="absolute right-5 top-1/2 -translate-y-1/2 text-xl text-[#888] dark:text-slate-500" />
+                        </div>
+                        <button
+                            data-aos="fade-right"
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full h-12 bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700 disabled:bg-teal-300 dark:disabled:bg-teal-800 disabled:cursor-not-allowed transition-all duration-300 ease-in-out rounded-[8px] shadow-[0_0_10px_rgba(0,0,0,0.1)] text-white font-semibold text-[16px]"
                         >
-                            <FaGoogle />
-                        </span>
-                        <span
-                            data-aos="fade-up"
-                            data-aos-delay="250"
-                            className="inline-flex p-2 border-2 border-slate-500 hover:border-teal-500 rounded-[8px] text-base text-slate-700 hover:text-teal-700 transition-all duration-300 ease-in-out mx-2 cursor-pointer"
+                            {isLoading ? "در حال ارسال..." : "ارسال کد تأیید"}
+                        </button>
+                        <p className="text-[14.5px] my-[15px] text-slate-500 dark:text-slate-400" data-aos="zoom-in">
+                            یا ورود با حساب های
+                        </p>
+                        <div className="flex justify-center">
+                            <button
+                                type="button"
+                                onClick={() => handleOAuthLogin("google")}
+                                data-aos="fade-up"
+                                data-aos-delay="0"
+                                className="inline-flex p-2 border-2 border-slate-500 dark:border-slate-600 hover:border-teal-500 dark:hover:border-teal-400 rounded-[8px] text-base text-slate-700 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 transition-all duration-300 ease-in-out mx-2 cursor-pointer"
+                            >
+                                <FaGoogle />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleOAuthLogin("linkedin")}
+                                data-aos="fade-up"
+                                data-aos-delay="250"
+                                className="inline-flex p-2 border-2 border-slate-500 dark:border-slate-600 hover:border-teal-500 dark:hover:border-teal-400 rounded-[8px] text-base text-slate-700 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 transition-all duration-300 ease-in-out mx-2 cursor-pointer"
+                            >
+                                <FaLinkedinIn />
+                            </button>
+                        </div>
+                    </form>
+                )}
+
+                {step === "code" && (
+                    <form className="w-full" onSubmit={handleVerifyOTP}>
+                        <h1 className="text-4xl -mt-2 text-slate-700 dark:text-slate-200" data-aos="fade-down">
+                            {userType === "new" ? "ثبت نام" : "ورود"}
+                        </h1>
+                        {userType === "new" && (
+                            <>
+                                <div className="relative my-[20px]" data-aos="fade-left">
+                                    <input
+                                        type="text"
+                                        placeholder="نام و نام خانوادگی"
+                                        value={name}
+                                        onChange={(e) => {
+                                            // Sanitize input: only allow letters, spaces, and Persian characters
+                                            const sanitized = e.target.value.replace(/[^آ-یa-zA-Z\s]/g, '');
+                                            setName(sanitized);
+                                        }}
+                                        maxLength={100}
+                                        className="w-full py-3 pr-4 pl-[20px] bg-slate-200 dark:bg-slate-700 rounded-lg border-none outline-none text-base text-slate-500 dark:text-slate-300 font-medium placeholder:text-[#888] dark:placeholder:text-slate-500 placeholder:font-normal placeholder:text-right text-left"
+                                        required
+                                    />
+                                </div>
+                                <div className="relative my-[20px]" data-aos="fade-left">
+                                    <input
+                                        type="email"
+                                        placeholder="ایمیل (اختیاری)"
+                                        value={email}
+                                        onChange={(e) => {
+                                            const value = e.target.value.toLowerCase().trim();
+                                            setEmail(value);
+                                        }}
+                                        onBlur={(e) => {
+                                            if (e.target.value && !validateEmail(e.target.value)) {
+                                                toast.error("فرمت ایمیل نامعتبر است");
+                                            }
+                                        }}
+                                        className="w-full py-3 pr-4 pl-[20px] bg-slate-200 dark:bg-slate-700 rounded-lg border-none outline-none text-base text-slate-500 dark:text-slate-300 font-medium placeholder:text-[#888] dark:placeholder:text-slate-500 placeholder:font-normal placeholder:text-right text-left"
+                                    />
+                                </div>
+                            </>
+                        )}
+                        <div className="relative my-[30px]" data-aos="fade-left">
+                            <OTPInput
+                                length={6}
+                                value={code}
+                                onChange={(value) => setCode(value)}
+                                onComplete={(value) => {
+                                    setCode(value);
+                                }}
+                                disabled={isLoading}
+                                className="w-full"
+                                autoSubmit={true}
+                                onSubmit={(submittedValue) => {
+                                    const finalCode = submittedValue || code;
+                                    if (finalCode && finalCode.length === 6 && !isLoading && !isSubmittingRef.current) {
+                                        handleVerifyOTP(null, finalCode);
+                                    }
+                                }}
+                            />
+                        </div>
+                        
+                        {/* Resend OTP and Edit Phone */}
+                        <div className="flex items-center justify-between gap-4 my-4" data-aos="fade-up">
+                            <button
+                                type="button"
+                                onClick={handleResendOTP}
+                                disabled={resendCooldown > 0 || isLoading}
+                                className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 disabled:text-slate-400 dark:disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
+                            >
+                                {resendCooldown > 0 ? `ارسال مجدد (${resendCooldown} ثانیه)` : "ارسال مجدد کد"}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setStep("phoneNumber");
+                                    setCode("");
+                                    setName("");
+                                    setEmail("");
+                                    setUserType(null);
+                                    setOtpSentTime(null);
+                                    setResendCooldown(0);
+                                }}
+                                className="text-sm text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                            >
+                                ویرایش شماره
+                            </button>
+                        </div>
+
+                        <button
+                            data-aos="fade-right"
+                            type="submit"
+                            disabled={isLoading || code.length !== 6}
+                            className="w-full h-12 bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700 disabled:bg-teal-300 dark:disabled:bg-teal-800 disabled:cursor-not-allowed transition-all duration-300 ease-in-out rounded-[8px] shadow-[0_0_10px_rgba(0,0,0,0.1)] text-white font-semibold text-[16px]"
                         >
-                            <FaLinkedinIn />
-                        </span>
-                    </div>
-                </form>
+                            {isLoading ? "در حال بررسی..." : userType === "new" ? "ثبت نام" : "ورود"}
+                        </button>
+                    </form>
+                )}
             </div>
 
             {/* Toggle Box */}

@@ -1,0 +1,98 @@
+{
+  "name": "آژانس دیجیتال مارکتینگ هیکاوب",
+  "short_name": "هیکاوب",
+  "description": "آژانس دیجیتال مارکتینگ هیکاوب ارائه دهنده انواع خدمات برندیگ از جمله : طراحی لوگو، مدیریت شبکه های اجتماعی، طراحی سایت، سئو سایت، طراحی تیزر و موشن گرافیک",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d9488",
+  "orientation": "portrait-primary",
+  "dir": "rtl",
+  "lang": "fa",
+  "icons": [
+    {
+      "src": "/assets/icons/icon-72x72.webp",
+      "sizes": "72x72",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-96x96.webp",
+      "sizes": "96x96",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-128x128.webp",
+      "sizes": "128x128",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-144x144.webp",
+      "sizes": "144x144",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-152x152.webp",
+      "sizes": "152x152",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-192x192.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-384x384.webp",
+      "sizes": "384x384",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-512x512.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["business", "marketing", "design"],
+  "shortcuts": [
+    {
+      "name": "خدمات",
+      "short_name": "خدمات",
+      "description": "مشاهده لیست خدمات",
+      "url": "/service",
+      "icons": [{ "src": "/assets/icons/icon-96x96.webp", "sizes": "96x96" }]
+    },
+    {
+      "name": "مقالات",
+      "short_name": "مقالات",
+      "description": "مطالب و مقالات",
+      "url": "/mag",
+      "icons": [{ "src": "/assets/icons/icon-96x96.webp", "sizes": "96x96" }]
+    },
+    {
+      "name": "تماس با ما",
+      "short_name": "تماس",
+      "description": "ارتباط با ما",
+      "url": "/contact-us",
+      "icons": [{ "src": "/assets/icons/icon-96x96.webp", "sizes": "96x96" }]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
+

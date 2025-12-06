@@ -1,43 +1,105 @@
-import { articles } from "@/__mocks__";
-import { ArticleCard } from "@/components/cards";
-import { MagnifyingGlass } from "@/lib/icons/svg";
-import { MagCategoriesSlider } from "@/components/sliders";
+import { notFound } from "next/navigation";
+import { serverGet } from "@/lib/api/server";
+import { generateBreadcrumbSchema } from "@/lib/seo";
+import ArticlesListClient from "@/components/articles/ArticlesListClient";
 
-const MagHomePage = () => {
-    return (
-        <main className="w-full py-5 md:py-14 flex flex-col gap-10 md:gap-14 overflow-hidden md:overflow-visible">
-            <div className="w-full h-56 lg:h-96 relative flex flex-col justify-center items-center place-items-center bg-mag-landing bg-no-repeat bg-cover bg-center" data-aos="zoom-in">
-                <div className="flex flex-col gap-y-1 md:gap-y-3.5 -mt-10 md:mt-0">
-                    <h1 className="text-white text-3xl sm:text-4xl md:text-5xl font-bold" data-aos="fade-down" data-aos-delay="700">
-                        هیکا مگ
-                    </h1>
-                    <div className="flex items-center justify-center gap-x-1 text-xs text-white font-bold" data-aos="fade-up" data-aos-delay="700">
-                        <span>صفحه اصلی</span>
-                        {">"}
-                        <span>هیکا مگ</span>
-                    </div>
-                </div>
-                <div className="absolute bottom-5 md:bottom-8 rounded-xl w-[300px] h-11" data-aos="zoom-out" data-aos-delay="700">
-                    <input
-                        type="text"
-                        placeholder="عنوان مقاله را جستجو کنید..."
-                        className="w-full h-full bg-transparent border border-white/30 rounded-2xl py-3.5 pr-3.5 text-white text-base placeholder:text-white placeholder:text-base"
-                    />
-                    <button type="button" className="absolute left-0 w-12 h-full border border-white rounded-xl">
-                        <MagnifyingGlass className="m-auto" />
-                    </button>
-                </div>
-            </div>
-            <div className="w-full max-w-full lg:max-w-6xl mx-auto flex flex-col gap-10 md:gap-14">
-                <MagCategoriesSlider />
-                <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-8 lg:gap-12">
-                    {articles.map((article, index) => (
-                        <ArticleCard article={article} key={index} data-aos="fade-up" data-aos-delay={index * 150} />
-                    ))}
-                </div>
-            </div>
-        </main>
-    );
+export const metadata = {
+    title: "هیکا مگ | مرجع تخصصی مقالات و اخبار",
+    description: "مرجع تخصصی مقالات و اخبار دنیای تکنولوژی، طراحی و توسعه وب",
+    keywords: "مقالات, اخبار, تکنولوژی, طراحی وب, توسعه وب, هیکاوب",
+    openGraph: {
+        title: "هیکا مگ | مرجع تخصصی مقالات",
+        description: "مرجع تخصصی مقالات و اخبار دنیای تکنولوژی",
+        type: "website",
+    },
 };
 
-export default MagHomePage;
+export default async function MagHomePage({ searchParams }) {
+    // In Next.js 15, searchParams must be awaited
+    const params = await searchParams;
+    const page = parseInt(params?.page) || 1;
+    const limit = 9; // تعداد پیش‌فرض 9
+    const search = params?.search || '';
+    const category = params?.category || '';
+    
+    // Fetch articles
+    let articlesData = { data: [], pagination: { page: 1, limit, total: 0, totalPages: 1 } };
+    try {
+        const queryParams = new URLSearchParams({
+            lang: "fa",
+            isPublished: "true",
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        
+        if (search && search !== 'undefined' && search.trim() !== '') {
+            queryParams.append('search', search);
+        }
+        
+        if (category && category !== 'undefined' && category !== 'all' && category.trim() !== '') {
+            const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+            if (objectIdPattern.test(category)) {
+                queryParams.append('category', category);
+            }
+        }
+        
+        const response = await serverGet(`/articles?${queryParams.toString()}`);
+        
+        articlesData = {
+            data: response.data || [],
+            pagination: response.pagination || { page: 1, limit, total: 0, totalPages: 1 }
+        };
+    } catch (error) {
+        console.error("Error fetching articles:", error);
+    }
+
+    // Fetch categories
+    let categories = [];
+    try {
+        const categoriesResponse = await serverGet('/categories?type=article&status=active&limit=50');
+        categories = categoriesResponse.data || [];
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+    }
+
+    // Fetch featured articles
+    let featuredArticles = [];
+    try {
+        const featuredResponse = await serverGet('/articles/featured?limit=3');
+        featuredArticles = featuredResponse.data?.articles || [];
+    } catch (error) {
+        console.error('Error fetching featured articles:', error);
+    }
+
+    // Fetch popular articles for sidebar
+    let popularArticles = [];
+    try {
+        const popularResponse = await serverGet('/articles/popular?limit=5');
+        popularArticles = popularResponse.data?.articles || [];
+    } catch (error) {
+        console.error('Error fetching popular articles:', error);
+    }
+
+    // Generate breadcrumb schema
+    const breadcrumbSchema = generateBreadcrumbSchema([
+        { name: "صفحه اصلی", url: "https://hikaweb.ir" },
+        { name: "هیکا مگ", url: "https://hikaweb.ir/mag" }
+    ]);
+
+    return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+            />
+            <ArticlesListClient
+                initialArticles={articlesData.data}
+                initialPagination={articlesData.pagination}
+                categories={categories}
+                featuredArticles={featuredArticles}
+                popularArticles={popularArticles}
+                searchParams={params}
+            />
+        </>
+    );
+}

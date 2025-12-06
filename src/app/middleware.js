@@ -1,13 +1,57 @@
 import { NextResponse } from 'next/server';
 
-export function middleware(request) {
-  const accessToken = request.cookies.get('accessToken');
-  const refreshToken = request.cookies.get('refreshToken');
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.hikaweb.ir/api/v1';
+
+export async function middleware(request) {
   const pathname = request.nextUrl.pathname;
   const siteType = process.env.NEXT_PUBLIC_SITE_TYPE;
 
+  // Skip maintenance check for maintenance page itself and API routes
+  if (pathname === '/maintenance' || pathname.startsWith('/api') || pathname.startsWith('/_next')) {
+    return NextResponse.next();
+  }
+
+  // Check maintenance mode for main site only
+  if (siteType === 'main') {
+    try {
+      const maintenanceResponse = await fetch(`${API_URL}/settings/maintenance`, {
+        cache: 'no-store',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (maintenanceResponse.ok) {
+        const data = await maintenanceResponse.json();
+        const maintenance = data.data?.maintenance;
+
+        if (maintenance?.enabled) {
+          // Get client IP (if available from headers)
+          const clientIP = request.headers.get('x-forwarded-for') || 
+                          request.headers.get('x-real-ip') || 
+                          'unknown';
+          
+          // Check if IP is allowed
+          const allowedIPs = maintenance.allowedIPs || [];
+          const isIPAllowed = allowedIPs.length === 0 || allowedIPs.includes(clientIP);
+
+          // Redirect to maintenance page if IP is not allowed
+          if (!isIPAllowed && pathname !== '/maintenance') {
+            return NextResponse.redirect(new URL('/maintenance', request.url));
+          }
+        }
+      }
+    } catch (error) {
+      // If API call fails, continue normally (don't block site)
+      console.error('Maintenance check error:', error);
+    }
+  }
+
+  const accessToken = request.cookies.get('accessToken');
+  const refreshToken = request.cookies.get('refreshToken');
+
   // Public paths that don't require authentication
-  const publicPaths = ['/auth/login', '/auth/callback', '/auth/error', '/'];
+  const publicPaths = ['/auth', '/auth/login', '/auth/callback', '/auth/error', '/', '/maintenance'];
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
 
   // Check authentication
@@ -27,13 +71,13 @@ export function middleware(request) {
     const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path));
     
     if (isProtectedPath && !isAuthenticated) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
+      return NextResponse.redirect(new URL('/auth', request.url));
     }
   }
 
   // Redirect authenticated users away from login
-  if (pathname === '/auth/login' && isAuthenticated) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  if ((pathname === '/auth' || pathname === '/auth/login') && isAuthenticated) {
+    return NextResponse.redirect(new URL('/profile', request.url));
   }
 
   return NextResponse.next();

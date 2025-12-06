@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dark mode scrollbar */
+@layer utilities {
+  .dark-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .dark-scrollbar::-webkit-scrollbar-track {
+    @apply bg-slate-800;
+  }
+  
+  .dark-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-600 rounded-full;
+  }
+  
+  .dark-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-500;
+  }
+}
+
 * {
     scroll-behavior: smooth;
     outline: none;
@@ -135,4 +155,22 @@ p::selection {
     to {
         transform: translateX(50%);
     }
+}
+
+/* AOS Content Visibility Fix */
+/* Show content by default to prevent FOUC (Flash of Unstyled Content) */
+/* This ensures content is visible even before AOS initializes */
+html:not(.aos-initialized) [data-aos] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+/* Once AOS initializes, it will control the animations */
+html.aos-initialized [data-aos]:not(.aos-animate) {
+    opacity: 0;
+}
+
+html.aos-initialized [data-aos].aos-animate {
+    opacity: 1;
 }

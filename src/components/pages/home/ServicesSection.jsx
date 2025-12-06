@@ -8,7 +8,29 @@ import { Swiper, SwiperSlide } from "swiper/react";
 
 import { services_list } from "@/lib/constants";
 
-const ServicesSection = () => {
+// Service slug to gif mapping (fallback)
+const SERVICE_GIF_MAP = {
+    "seo-and-optimization": "/assets/giff/market-research.gif",
+    "hika-studio": "/assets/giff/green-screen.gif",
+    "graphic-design": "/assets/giff/monitor.gif",
+    "printing": "/assets/giff/printer.gif",
+    "social-media-management": "/assets/giff/social-media.gif",
+    "content-production-and-editing": "/assets/giff/trending.gif",
+    "logo-design": "/assets/giff/vector.gif",
+    "web-design": "/assets/giff/web-developer.gif",
+};
+
+const ServicesSection = ({ services = [] }) => {
+    // Use API services if available, otherwise fallback to static list
+    const displayServices = services.length > 0 
+        ? services.map(service => ({
+            title: service.name?.fa || service.name,
+            giffSrc: SERVICE_GIF_MAP[service.slug?.fa] || SERVICE_GIF_MAP[service.slug?.en] || "/assets/giff/market-research.gif",
+            url: `/service/${service.slug?.fa || service.slug?.en || service.slug}`,
+            service
+        }))
+        : services_list;
+
     return (
         <section id="services-section" className="w-full">
             <h4
@@ -18,7 +40,7 @@ const ServicesSection = () => {
                 خدمات جامع هیکاوب
             </h4>
             <div className="w-full hidden sm:grid grid-cols-4 gap-5 mt-10 max-w-5xl mx-auto">
-                {services_list.map(({ giffSrc, url, title }, index) => (
+                {displayServices.map(({ giffSrc, url, title }, index) => (
                     <Link
                         href={url}
                         key={index}
@@ -42,8 +64,16 @@ const ServicesSection = () => {
             </div>
             {/* In Mobile Screen ( < 768 ) Show as Slider */}
             <div className="w-full sm:hidden">
-                <Swiper slidesPerView={1.4} spaceBetween={25} centeredSlides={true} autoplay={true} modules={[Autoplay]} loop={true} className="w-full mySwiper7 mt-5">
-                    {services_list.map(({ giffSrc, url, title }, index) => (
+                <Swiper 
+                    slidesPerView={1.4} 
+                    spaceBetween={25} 
+                    centeredSlides={true} 
+                    autoplay={true} 
+                    modules={[Autoplay]} 
+                    loop={false}
+                    className="w-full mySwiper7 mt-5"
+                >
+                    {displayServices.map(({ giffSrc, url, title }, index) => (
                         <SwiperSlide
                             key={index}
                             className="rounded-2xl shadow-md hover:shadow hover:shadow-teal-500 hover:border-b-teal-500 hover:-translate-y-2 transition-all duration-300 ease-in-out group"

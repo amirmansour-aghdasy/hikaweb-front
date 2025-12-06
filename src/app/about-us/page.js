@@ -2,6 +2,22 @@ import Image from "next/image";
 
 import { teamMembers } from "@/lib/constants";
 import TeamMemberCard from "@/components/cards/TeamMemberCard";
+import { defaultMetadata } from "@/lib/seo";
+
+export const metadata = {
+    title: "درباره ما | هیکاوب",
+    description: "هیکاوب از سال 1399 فعالیت خود را در زمینه مارکتینگ و دیجیتال مارکتینگ استارت زده و مفتخر است به بیش از 70 کسب و کار ایرانی کمک کرده است",
+    keywords: "درباره هیکاوب, تیم هیکاوب, آژانس دیجیتال مارکتینگ, هیکاوب",
+    openGraph: {
+        title: "درباره ما | هیکاوب",
+        description: "هیکاوب انرژی هر کسب و کار",
+        url: `${defaultMetadata.siteUrl}/about-us`,
+        type: "website",
+    },
+    alternates: {
+        canonical: `${defaultMetadata.siteUrl}/about-us`,
+    },
+};
 
 const AboutUsPage = () => {
     return (
@@ -29,12 +45,12 @@ const AboutUsPage = () => {
                     data-aos="fade-left"
                 />
                 <div className="col-span-12 md:col-span-8">
-                    <h1 className="text-xl md:text-2xl text-slate-700 font-semibold" data-aos="fade-down">
+                    <h1 className="text-xl md:text-2xl text-slate-700 dark:text-slate-200 font-semibold" data-aos="fade-down">
                         درباره ما
                     </h1>
-                    <p className="w-full md:w-11/12 p-5 rounded-lg bg-slate-100 text-slate-500 left-6 text-xs font-semibold leading-7 md:leading-8 sm:text-sm md:text-base mt-5" data-aos="fade-up">
+                    <p className="w-full md:w-11/12 p-5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 left-6 text-xs font-semibold leading-7 md:leading-8 sm:text-sm md:text-base mt-5" data-aos="fade-up">
                         هیکاوب از سال 1399 فعالیت خود را در زمینه مارکتینگ و دیجیتال مارکتینگ استارت زده و مفتخر است به بیش از 70 کسب و کار ایرانی کمک کرده است ، هدف ما انرژی دادن و کمک به هر کسب و
-                        کار ایرانی در زمینه های مختلف برای دیده شدن است . دقیقا شعار هیکاوب نیز همین است : <span className="text-teal-600">“ هیکاوب انرژی هر کسب و کار “.</span> تیم هیکاوب از شروع تا
+                        کار ایرانی در زمینه های مختلف برای دیده شدن است . دقیقا شعار هیکاوب نیز همین است : <span className="text-teal-600 dark:text-teal-400">" هیکاوب انرژی هر کسب و کار ".</span> تیم هیکاوب از شروع تا
                         اوج کسب و کار شما میتواند همراهتان باشد ، زیرا طیف خدمات تخصصی ما بسیار گسترده است و از برندسازی تا بازاریابی و تبلیغات شمارا شامل میگردد ، امروزه در زمینه دیجیتال مارکتینگ ما
                         سعی کردیم تیمی دلسوز برای کسب و کار های ایرانی جمع آوری کنیم تا به امید خدا در کنار پیشرفت داشته باشیم .
                     </p>
@@ -42,11 +58,11 @@ const AboutUsPage = () => {
             </section>
             <section id="team-members" className="w-full">
                 <div className="w-full flex justify-center items-center gap-2.5">
-                    <span className="w-full h-0.5 bg-teal-700" data-aos="fade-left"></span>
-                    <h3 className="text-lg text-slate-700 whitespace-nowrap font-bold" data-aos="zoom-in">
+                    <span className="w-full h-0.5 bg-teal-700 dark:bg-teal-600" data-aos="fade-left"></span>
+                    <h3 className="text-lg text-slate-700 dark:text-slate-200 whitespace-nowrap font-bold" data-aos="zoom-in">
                         تیم هیکاوب
                     </h3>
-                    <span className="w-full h-0.5 bg-teal-700" data-aos="fade-right"></span>
+                    <span className="w-full h-0.5 bg-teal-700 dark:bg-teal-600" data-aos="fade-right"></span>
                 </div>
                 <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 mt-5">
                     {teamMembers.map((member, index) => (

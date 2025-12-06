@@ -3,10 +3,15 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 
-import { articles } from "@/__mocks__";
 import { ArticleCard } from "@/components/cards";
 
-const MagPreviewSection = () => {
+const MagPreviewSection = ({ articles = [] }) => {
+    const displayArticles = articles.slice(0, 6);
+
+    if (displayArticles.length === 0) {
+        return null;
+    }
+
     return (
         <section id="mag-preview-section" className="w-full">
             <div className="w-full flex justify-between items-center">
@@ -19,7 +24,7 @@ const MagPreviewSection = () => {
             </div>
             <div className="relative w-full">
                 <Swiper
-                    loop={true}
+                    loop={displayArticles.length > 1}
                     slidesPerView={1.3}
                     spaceBetween={25}
                     autoplay={{ pauseOnMouseEnter: true }}
@@ -35,8 +40,8 @@ const MagPreviewSection = () => {
                     modules={[Autoplay]}
                     data-aos="zoom-in"
                 >
-                    {articles.map((article, index) => (
-                        <SwiperSlide className="shadow-md w-full rounded-2xl" key={index}>
+                    {displayArticles.map((article, index) => (
+                        <SwiperSlide className="shadow-md w-full rounded-2xl" key={article.id || index}>
                             <ArticleCard article={article} />
                         </SwiperSlide>
                     ))}
