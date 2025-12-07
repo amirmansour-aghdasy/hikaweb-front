@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { FaGoogle, FaLinkedinIn } from "react-icons/fa6";
@@ -12,7 +14,7 @@ import useAuthStore from "@/lib/store/authStore";
 import { validatePhoneNumber, validateEmail } from "@/lib/utils/sanitize";
 import OTPInput from "@/components/forms/OTPInput";
 
-export default function LoginPage() {
+function LoginPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get("redirect") || "/profile";
@@ -328,5 +330,17 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="relative w-full max-w-4xl h-auto min-h-[550px] mx-auto bg-white dark:bg-slate-800 m-5 rounded-3xl shadow-lg overflow-hidden flex items-center justify-center">
+                <div className="text-slate-700 dark:text-slate-200">در حال بارگذاری...</div>
+            </div>
+        }>
+            <LoginPageContent />
+        </Suspense>
     );
 }
