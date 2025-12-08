@@ -12,13 +12,15 @@ export async function middleware(request) {
   }
 
   // Check maintenance mode for main site only
+  // Cache maintenance check for 30 seconds to reduce API calls
   if (siteType === 'main') {
     try {
       const maintenanceResponse = await fetch(`${API_URL}/settings/maintenance`, {
-        cache: 'no-store',
+        next: { revalidate: 30 }, // Cache for 30 seconds
         headers: {
           'Accept': 'application/json',
         },
+        signal: AbortSignal.timeout(5000), // 5 second timeout
       });
 
       if (maintenanceResponse.ok) {
