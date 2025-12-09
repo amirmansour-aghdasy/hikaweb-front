@@ -29,6 +29,24 @@ export default async function sitemap() {
             changeFrequency: 'monthly',
             priority: 0.7,
         },
+        {
+            url: `${baseUrl}/service`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/pricing`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/portfolio`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        },
     ];
 
     try {
@@ -54,7 +72,18 @@ export default async function sitemap() {
             priority: 0.6,
         }));
 
-        return [...staticRoutes, ...serviceRoutes, ...articleRoutes];
+        // Fetch portfolios (with longer cache for sitemap)
+        const portfoliosData = await serverGet('/portfolio?status=active&limit=500', { revalidate: 3600 });
+        const portfolios = portfoliosData.data || [];
+        
+        const portfolioRoutes = portfolios.map((portfolio) => ({
+            url: `${baseUrl}/portfolio/${portfolio.slug?.fa || portfolio.slug?.en || portfolio.slug}`,
+            lastModified: portfolio.updatedAt ? new Date(portfolio.updatedAt) : new Date(portfolio.createdAt),
+            changeFrequency: 'monthly',
+            priority: 0.7,
+        }));
+
+        return [...staticRoutes, ...serviceRoutes, ...articleRoutes, ...portfolioRoutes];
     } catch (error) {
         console.error('Error generating sitemap:', error);
         // Return static routes if API fails

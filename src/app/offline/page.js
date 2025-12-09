@@ -1,11 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
-export const metadata = {
-    title: "آفلاین | هیکاوب",
-    description: "شما در حال حاضر آفلاین هستید",
-    robots: "noindex, nofollow",
-};
+export const dynamic = 'force-dynamic';
 
 export default function OfflinePage() {
     return (

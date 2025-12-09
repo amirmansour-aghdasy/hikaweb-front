@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { apiClient } from "@/services/api/client";
+import { apiClient, setUnauthorizedHandler } from "@/services/api/client";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
@@ -10,13 +10,15 @@ let isInitializing = false;
 
 const useAuthStore = create(
     persist(
-        (set, get) => ({
-            user: null,
-            isLoading: false,
-            isAuthenticated: false,
+        (set, get) => {
+            // Set up global unauthorized handler
+            const store = {
+                user: null,
+                isLoading: false,
+                isAuthenticated: false,
 
-            // Initialize auth state
-            init: async () => {
+                // Initialize auth state
+                init: async () => {
                 // If already initializing, return the existing promise
                 if (isInitializing && initPromise) {
                     return initPromise;
@@ -204,7 +206,38 @@ const useAuthStore = create(
                     window.location.href = "/";
                 }
             },
-        }),
+
+            // Handle unauthorized (token expired)
+            handleUnauthorized: async () => {
+                const refreshToken = Cookies.get("refreshToken");
+                
+                // Clear state and cookies
+                Cookies.remove("accessToken", { path: "/" });
+                Cookies.remove("refreshToken", { path: "/" });
+                set({ user: null, isAuthenticated: false });
+                
+                // Show toast notification
+                toast.error("جلسه شما منقضی شده است. لطفاً دوباره وارد شوید.");
+                
+                // Redirect to login if not already there
+                if (typeof window !== "undefined" && !window.location.pathname.includes("/auth")) {
+                    window.location.href = "/auth";
+                }
+            },
+            };
+
+            // Set up global handler for unauthorized errors
+            if (typeof window !== "undefined") {
+                setUnauthorizedHandler(() => {
+                    const currentState = get();
+                    if (currentState.handleUnauthorized) {
+                        currentState.handleUnauthorized();
+                    }
+                });
+            }
+
+            return store;
+        },
         {
             name: "auth-storage",
             partialize: (state) => ({

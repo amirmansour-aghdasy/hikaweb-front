@@ -21,6 +21,13 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+// Global handler for 401 errors - will be set by authStore
+let handleUnauthorized = null;
+
+export const setUnauthorizedHandler = (handler) => {
+  handleUnauthorized = handler;
+};
+
 class ApiClient {
   constructor(baseURL = API_BASE_URL) {
     this.baseURL = baseURL;
@@ -79,10 +86,34 @@ class ApiClient {
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          // Handle 401 errors gracefully (authentication required)
+          // Handle 401 errors (authentication required or token expired)
           if (response.status === 401) {
-            // Don't throw error for 401, just return empty data
-            // This allows the app to continue working without authentication
+            // Check if we have a token (means user was authenticated but token expired)
+            const hasToken = typeof window !== 'undefined' && 
+                           document.cookie.split(';').some(c => c.trim().startsWith('accessToken='));
+            
+            if (hasToken && handleUnauthorized) {
+              // Token exists but expired - logout user
+              console.warn('Token expired, logging out user');
+              handleUnauthorized();
+            }
+            
+            // For public endpoints, return gracefully
+            // For protected endpoints, throw error so caller can handle it
+            const isAuthEndpoint = endpoint.includes('/auth/') && !endpoint.includes('/auth/send-otp') && !endpoint.includes('/auth/verify-otp');
+            const isProtectedEndpoint = endpoint.includes('/profile') || endpoint.includes('/tickets') || 
+                                       endpoint.includes('/consultations') || endpoint.includes('/bookmarks') ||
+                                       endpoint.includes('/notifications');
+            
+            if (isAuthEndpoint || isProtectedEndpoint) {
+              // Throw error for auth/protected endpoints so authStore can handle it
+              const error = new Error(errorData.message || 'Authentication required');
+              error.status = 401;
+              error.data = errorData;
+              throw error;
+            }
+            
+            // For public endpoints, return gracefully
             console.warn('Authentication required for:', url);
             return { success: false, data: null, message: errorData.message || 'Authentication required' };
           }

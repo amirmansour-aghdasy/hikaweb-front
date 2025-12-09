@@ -7,11 +7,11 @@ export const navbarItems = [
     },
     {
         title: "تعرفه خدمات",
-        url: "#",
+        url: "/pricing",
     },
     {
         title: "نمونه کار",
-        url: "#",
+        url: "/portfolio",
     },
     {
         title: "دریافت مشاوره",

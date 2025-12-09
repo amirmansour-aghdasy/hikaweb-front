@@ -50,6 +50,11 @@ COPY --from=builder /app/.next/static ./.next/static
 # Set permissions
 RUN chown -R nextjs:nodejs /app
 
+# Remove write permissions from /tmp and /home/nextjs to prevent malware injection
+RUN chmod 755 /tmp && \
+    chmod 755 /home/nextjs && \
+    rm -rf /tmp/* /home/nextjs/bin /home/nextjs/.javs 2>/dev/null || true
+
 # Switch to non-root user
 USER nextjs
 

@@ -184,12 +184,6 @@ const CounselingForm = () => {
                         )
                     )}
                 </select>
-                {/* Debug info - remove after fixing */}
-                {process.env.NODE_ENV === 'development' && (
-                    <div className="text-xs text-red-500 mt-1">
-                        Services count: {services.length} | Loading: {loadingServices ? 'Yes' : 'No'}
-                    </div>
-                )}
             </div>
             <input
                 type="email"

@@ -31,6 +31,11 @@ const BrandsSection = dynamic(() => import("@/components/pages/home/BrandsSectio
     ssr: true,
 });
 
+const BannersSection = dynamic(() => import("@/components/pages/home/BannersSection"), {
+    loading: () => <div className="w-full h-48 bg-slate-100 animate-pulse rounded-2xl" />,
+    ssr: true,
+});
+
 export const metadata = {
     title: defaultMetadata.title.fa,
     description: defaultMetadata.description.fa,
@@ -98,6 +103,30 @@ const HomePage = async () => {
     } catch (error) {
         // Silently fail - fallback brands will be used
         // This is optional data
+    }
+
+    // Fetch banners for home-page-banners section
+    let banners = [];
+    try {
+        const bannersResponse = await serverGet('/banners/active/home-page-banners');
+        banners = bannersResponse.data?.banners || [];
+    } catch (error) {
+        console.error("Error fetching banners:", error);
+        // Fallback to default banners if API fails
+        banners = [
+            {
+                image: "/assets/banners/logo-ad-banner.webp",
+                mobileImage: "/assets/banners/logo-ad-banner.webp",
+                link: { url: "/service/logo-design", target: "_self" },
+                settings: { altText: { fa: "بنر طراحی لوگو" } }
+            },
+            {
+                image: "/assets/banners/photographing-ad-banner.webp",
+                mobileImage: "/assets/banners/photographing-ad-banner.webp",
+                link: { url: "/service/hika-studio", target: "_self" },
+                settings: { altText: { fa: "بنر هیکا استودیو" } }
+            }
+        ];
     }
 
     return (
@@ -169,14 +198,7 @@ const HomePage = async () => {
                 </div>
             </section>
             <ServicesSection services={services} />
-            <section id="home-page-banners" className="w-full grid grid-cols-1 md:grid-cols-2 place-items-center gap-5">
-                <Link href="/service/logo-design" className="w-full rounded-2xl overflow-hidden shadow-md" data-aos="fade-left">
-                    <Image src="/assets/banners/logo-ad-banner.webp" width="0" height="0" alt="" title="" sizes="100vw" className="w-full h-auto" />
-                </Link>
-                <Link href="/service/hika-studio" className="w-full rounded-2xl overflow-hidden shadow-md" data-aos="fade-right">
-                    <Image src="/assets/banners/photographing-ad-banner.webp" width="0" height="0" alt="" title="" sizes="100vw" className="w-full h-auto" />
-                </Link>
-            </section>
+            <BannersSection banners={banners} />
             <BrandsSection brands={brands} />
             {users_comment.length > 0 && (
                 <section id="comments-section" className="w-full">
