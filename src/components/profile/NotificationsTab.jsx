@@ -160,8 +160,18 @@ export default function NotificationsTab({ user }) {
             </div>
 
             {loading && notifications.length === 0 ? (
-                <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+                <div className="divide-y divide-slate-200 dark:divide-slate-700">
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} className="p-4 animate-pulse">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full flex-shrink-0"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
+                                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">

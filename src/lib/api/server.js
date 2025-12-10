@@ -31,8 +31,9 @@ export async function serverFetch(endpoint, options = {}) {
   const safeEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = `${API_BASE_URL}${safeEndpoint}`;
   
-  // Default cache strategy: revalidate every 60 seconds
-  const revalidate = options.revalidate ?? 60;
+  // Default cache strategy: revalidate every 300 seconds (5 minutes) for better performance
+  // Static/semi-static data can use longer cache times
+  const revalidate = options.revalidate ?? 300;
   const cacheStrategy = options.cache !== false 
     ? { next: { revalidate } } 
     : { cache: 'no-store' };

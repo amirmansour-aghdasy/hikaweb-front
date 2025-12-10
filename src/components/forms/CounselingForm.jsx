@@ -138,52 +138,52 @@ const CounselingForm = () => {
                 />
             </div>
             <div className="relative">
-                <select
-                    value={selectedServiceId}
-                    onChange={(e) => setSelectedServiceId(e.target.value)}
-                    disabled={loadingServices}
-                    required
-                    className={`
-                        w-full rounded-md bg-slate-50 p-3 md:p-3.5 text-sm
-                        border border-transparent
-                        focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500
-                        appearance-none cursor-pointer
-                        text-right
-                        ${loadingServices ? "opacity-50 cursor-not-allowed" : ""}
-                        ${selectedServiceId ? "text-slate-700" : "text-slate-400"}
-                    `}
-                    style={{
-                        backgroundImage: loadingServices 
-                            ? "none" 
-                            : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
-                        backgroundPosition: "right 0.75rem center",
-                        backgroundRepeat: "no-repeat",
-                        backgroundSize: "1.5em 1.5em",
-                        paddingLeft: "0.75rem",
-                        paddingRight: "2.5rem",
-                    }}
-                >
-                    <option value="" disabled>
-                        {loadingServices ? "در حال بارگذاری..." : "خدمت مورد نظر را انتخاب کنید"}
-                    </option>
-                    {services.length > 0 ? (
-                        services.map((service) => {
-                            const serviceId = service._id || service.id;
-                            const serviceName = service.name?.fa || service.name?.en || service.name || "خدمت بدون نام";
-                            return (
-                                <option key={serviceId} value={serviceId}>
-                                    {serviceName}
-                                </option>
-                            );
-                        })
-                    ) : (
-                        !loadingServices && (
+                {loadingServices ? (
+                    <div className="w-full rounded-md bg-slate-50 dark:bg-slate-800 p-3 md:p-3.5 animate-pulse">
+                        <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
+                    </div>
+                ) : (
+                    <select
+                        value={selectedServiceId}
+                        onChange={(e) => setSelectedServiceId(e.target.value)}
+                        required
+                        className={`
+                            w-full rounded-md bg-slate-50 p-3 md:p-3.5 text-sm
+                            border border-transparent
+                            focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500
+                            appearance-none cursor-pointer
+                            text-right
+                            ${selectedServiceId ? "text-slate-700" : "text-slate-400"}
+                        `}
+                        style={{
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                            backgroundPosition: "right 0.75rem center",
+                            backgroundRepeat: "no-repeat",
+                            backgroundSize: "1.5em 1.5em",
+                            paddingLeft: "0.75rem",
+                            paddingRight: "2.5rem",
+                        }}
+                    >
+                        <option value="" disabled>
+                            خدمت مورد نظر را انتخاب کنید
+                        </option>
+                        {services.length > 0 ? (
+                            services.map((service) => {
+                                const serviceId = service._id || service.id;
+                                const serviceName = service.name?.fa || service.name?.en || service.name || "خدمت بدون نام";
+                                return (
+                                    <option key={serviceId} value={serviceId}>
+                                        {serviceName}
+                                    </option>
+                                );
+                            })
+                        ) : (
                             <option value="" disabled>
                                 خدمتی یافت نشد
                             </option>
-                        )
-                    )}
-                </select>
+                        )}
+                    </select>
+                )}
             </div>
             <input
                 type="email"

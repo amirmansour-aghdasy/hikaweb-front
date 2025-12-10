@@ -165,7 +165,22 @@ function LoginPageContent() {
                                 inputMode="tel"
                                 placeholder="شماره همراه"
                                 value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                onChange={(e) => {
+                                    // Convert Persian/Arabic digits to English as user types
+                                    let value = e.target.value;
+                                    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                                    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                                    
+                                    persianDigits.forEach((persianDigit, index) => {
+                                        value = value.replace(new RegExp(persianDigit, 'g'), index.toString());
+                                    });
+                                    
+                                    arabicDigits.forEach((arabicDigit, index) => {
+                                        value = value.replace(new RegExp(arabicDigit, 'g'), index.toString());
+                                    });
+                                    
+                                    setPhoneNumber(value);
+                                }}
                                 autoComplete="tel"
                                 autoFocus={true}
                                 className="w-full py-3 pr-12 pl-[20px] bg-slate-200 dark:bg-slate-700 rounded-lg border-none outline-none text-base text-slate-500 dark:text-slate-300 font-medium placeholder:text-[#888] dark:placeholder:text-slate-500 placeholder:font-normal placeholder:text-right text-left"

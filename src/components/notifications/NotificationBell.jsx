@@ -40,7 +40,11 @@ export default function NotificationBell() {
     };
 
     if (loading) {
-        return null;
+        return (
+            <div className="relative p-2 rounded-lg animate-pulse">
+                <div className="w-6 h-6 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            </div>
+        );
     }
 
     return (

@@ -22,59 +22,69 @@ export default async function MagHomePage({ searchParams }) {
     const search = params?.search || '';
     const category = params?.category || '';
     
-    // Fetch articles
+    // Build query params for articles
+    const queryParams = new URLSearchParams({
+        lang: "fa",
+        isPublished: "true",
+        page: page.toString(),
+        limit: limit.toString(),
+    });
+    
+    if (search && search !== 'undefined' && search.trim() !== '') {
+        queryParams.append('search', search);
+    }
+    
+    if (category && category !== 'undefined' && category !== 'all' && category.trim() !== '') {
+        const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+        if (objectIdPattern.test(category)) {
+            queryParams.append('category', category);
+        }
+    }
+
+    // Fetch articles, categories, and featured articles in parallel
+    const [articlesRes, categoriesRes, featuredRes] = await Promise.allSettled([
+        serverGet(`/articles?${queryParams.toString()}`, { revalidate: 60 }), // 1 minute cache (dynamic content)
+        serverGet('/categories?type=article&status=active&limit=50', { revalidate: 600 }), // 10 minutes cache
+        serverGet('/articles/featured?limit=3', { revalidate: 300 }), // 5 minutes cache
+    ]);
+
+    // Process articles
     let articlesData = { data: [], pagination: { page: 1, limit, total: 0, totalPages: 1 } };
-    try {
-        const queryParams = new URLSearchParams({
-            lang: "fa",
-            isPublished: "true",
-            page: page.toString(),
-            limit: limit.toString(),
-        });
-        
-        if (search && search !== 'undefined' && search.trim() !== '') {
-            queryParams.append('search', search);
+    if (articlesRes.status === 'fulfilled') {
+        try {
+            articlesData = {
+                data: articlesRes.value.data || [],
+                pagination: articlesRes.value.pagination || { page: 1, limit, total: 0, totalPages: 1 }
+            };
+        } catch (error) {
+            console.error("Error processing articles:", error);
         }
-        
-        if (category && category !== 'undefined' && category !== 'all' && category.trim() !== '') {
-            const objectIdPattern = /^[0-9a-fA-F]{24}$/;
-            if (objectIdPattern.test(category)) {
-                queryParams.append('category', category);
-            }
-        }
-        
-        const response = await serverGet(`/articles?${queryParams.toString()}`);
-        
-        articlesData = {
-            data: response.data || [],
-            pagination: response.pagination || { page: 1, limit, total: 0, totalPages: 1 }
-        };
-    } catch (error) {
-        console.error("Error fetching articles:", error);
     }
 
-    // Fetch categories
+    // Process categories
     let categories = [];
-    try {
-        const categoriesResponse = await serverGet('/categories?type=article&status=active&limit=50');
-        categories = categoriesResponse.data || [];
-    } catch (error) {
-        console.error('Error fetching categories:', error);
+    if (categoriesRes.status === 'fulfilled') {
+        try {
+            categories = categoriesRes.value.data || [];
+        } catch (error) {
+            console.error('Error processing categories:', error);
+        }
     }
 
-    // Fetch featured articles
+    // Process featured articles
     let featuredArticles = [];
-    try {
-        const featuredResponse = await serverGet('/articles/featured?limit=3');
-        featuredArticles = featuredResponse.data?.articles || [];
-    } catch (error) {
-        console.error('Error fetching featured articles:', error);
+    if (featuredRes.status === 'fulfilled') {
+        try {
+            featuredArticles = featuredRes.value.data?.articles || [];
+        } catch (error) {
+            console.error('Error processing featured articles:', error);
+        }
     }
 
-    // Fetch popular articles for sidebar
+    // Fetch popular articles for sidebar (can be done separately as it's less critical)
     let popularArticles = [];
     try {
-        const popularResponse = await serverGet('/articles/popular?limit=5');
+        const popularResponse = await serverGet('/articles/popular?limit=5', { revalidate: 300 }); // 5 minutes cache
         popularArticles = popularResponse.data?.articles || [];
     } catch (error) {
         console.error('Error fetching popular articles:', error);

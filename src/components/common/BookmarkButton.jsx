@@ -76,7 +76,7 @@ export default function BookmarkButton({
         return (
             <button
                 onClick={handleBookmark}
-                disabled={isLoading || isChecking || !isAuthenticated}
+                disabled={isLoading || isChecking}
                 className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 shadow-lg ${
                     isBookmarked
                         ? 'bg-teal-600 text-white hover:bg-teal-700'
@@ -98,7 +98,7 @@ export default function BookmarkButton({
         return (
             <button
                 onClick={handleBookmark}
-                disabled={isLoading || isChecking || !isAuthenticated}
+                disabled={isLoading || isChecking}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all duration-300 ${
                     isBookmarked
                         ? 'bg-teal-600 text-white hover:bg-teal-700'
@@ -119,7 +119,7 @@ export default function BookmarkButton({
     return (
         <button
             onClick={handleBookmark}
-            disabled={isLoading || isChecking || !isAuthenticated}
+            disabled={isLoading || isChecking}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
                 isBookmarked
                     ? 'bg-teal-600 text-white hover:bg-teal-700'

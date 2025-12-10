@@ -13,17 +13,14 @@ import { FiArrowLeft, FiArrowRight, FiFilter } from "react-icons/fi";
 
 // Lazy load components
 const ArticleCard = dynamic(() => import("@/components/cards").then(mod => mod.ArticleCard), {
-    loading: () => <div className="w-full h-64 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse rounded-3xl" />,
     ssr: true,
 });
 
 const MagCategoriesSlider = dynamic(() => import("@/components/sliders").then(mod => mod.MagCategoriesSlider), {
-    loading: () => <div className="w-full h-32 bg-gradient-to-r from-slate-100 to-slate-200 animate-pulse rounded-2xl" />,
     ssr: true,
 });
 
 const ArticlesSidebar = dynamic(() => import("@/components/articles/ArticlesSidebar"), {
-    loading: () => <div className="w-80 h-96 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse rounded-3xl" />,
     ssr: true,
 });
 
@@ -309,11 +306,27 @@ export default function ArticlesListClient({
                             </div>
 
                             {isLoading && displayArticles.length === 0 ? (
-                                <div className="w-full flex justify-center items-center py-20">
-                                    <div className="flex flex-col items-center gap-4">
-                                        <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
-                                        <div className="text-slate-500 dark:text-slate-400 font-medium">در حال بارگذاری مقالات...</div>
-                                    </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {[...Array(6)].map((_, i) => (
+                                        <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden border border-slate-200 dark:border-slate-700 animate-pulse">
+                                            <div className="w-full h-48 md:h-56 bg-gradient-to-br from-slate-200 via-slate-300 to-slate-200 dark:from-slate-700 dark:via-slate-800 dark:to-slate-700"></div>
+                                            <div className="p-5 md:p-6 space-y-4">
+                                                <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-full w-20"></div>
+                                                <div className="space-y-2">
+                                                    <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-full"></div>
+                                                    <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-4/5"></div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full"></div>
+                                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-5/6"></div>
+                                                </div>
+                                                <div className="flex items-center gap-4 pt-2">
+                                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-16"></div>
+                                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-20"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             ) : displayArticles.length === 0 ? (
                                 <div className="w-full flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-700">

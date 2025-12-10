@@ -53,37 +53,30 @@ function ProgressBarComponent({ isSticky }) {
 
 // Lazy load components
 const GalleryLightbox = dynamic(() => import("@/components/common").then(mod => mod.GalleryLightbox), {
-    loading: () => <div className="w-full h-48 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse rounded-3xl" />,
     ssr: false,
 });
 
 const RelatedArticlesSlider = dynamic(() => import("@/components/articles/RelatedArticlesSlider"), {
-    loading: () => <div className="w-full h-64 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse rounded-3xl" />,
     ssr: true,
 });
 
 const RelatedVideos = dynamic(() => import("@/components/articles/RelatedVideos"), {
-    loading: () => <div className="w-full h-64 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse rounded-3xl" />,
     ssr: true,
 });
 
 const RelatedPortfolios = dynamic(() => import("@/components/articles/RelatedPortfolios"), {
-    loading: () => <div className="w-full h-64 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse rounded-3xl" />,
     ssr: true,
 });
 
 const ArticleSidebar = dynamic(() => import("@/components/articles/ArticleSidebar"), {
-    loading: () => <div className="w-80 h-96 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse rounded-3xl" />,
     ssr: true,
 });
 
 const TableOfContents = dynamic(() => import("@/components/articles/TableOfContents"), {
-    loading: () => <div className="w-full h-48 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse rounded-3xl" />,
     ssr: true,
 });
 
 const RatingWidget = dynamic(() => import("@/components/articles/RatingWidget"), {
-    loading: () => <div className="w-full h-20 bg-gradient-to-br from-slate-100 to-slate-200 animate-pulse rounded-3xl" />,
     ssr: true,
 });
 
@@ -112,6 +105,45 @@ export default function ArticleDetailClient({
         };
 
         fetchUserRating();
+    }, [article._id]);
+
+    // Track unique view
+    useEffect(() => {
+        const trackView = async () => {
+            if (typeof window === 'undefined') return;
+            
+            const articleId = article._id;
+            const storageKey = `article_view_${articleId}`;
+            
+            // Check if view already tracked in this session/browser
+            const hasViewed = localStorage.getItem(storageKey);
+            
+            if (!hasViewed) {
+                try {
+                    const response = await apiClient.post(`/articles/${articleId}/view`);
+                    
+                    if (response.data?.success) {
+                        // Mark as viewed in localStorage (expires after 24 hours)
+                        localStorage.setItem(storageKey, Date.now().toString());
+                        
+                        // Update article views count
+                        if (response.data?.data?.views !== undefined) {
+                            setArticle(prev => ({
+                                ...prev,
+                                views: response.data.data.views
+                            }));
+                        }
+                    }
+                } catch (error) {
+                    // Silently fail - don't interrupt user experience
+                    console.error('Error tracking view:', error);
+                }
+            }
+        };
+
+        // Track view after a short delay to ensure page is fully loaded
+        const timer = setTimeout(trackView, 1000);
+        return () => clearTimeout(timer);
     }, [article._id]);
 
     // Sticky header effect

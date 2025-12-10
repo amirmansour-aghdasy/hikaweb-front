@@ -1,40 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
 
-import { serverGet } from "@/lib/api/server";
 import { AnimatedText } from "@/components/ui";
 import { info_preview } from "@/lib/constants";
 import { CounselingForm } from "@/components/forms";
 import { InfoPreviewCard, CommentCard } from "@/components/cards";
 import { InstagramOutlined, RubikaFill, TelegramFill, WhatsAppOutlined } from "@/lib/icons";
-import dynamic from "next/dynamic";
+import { SlidersSection, ServicesSection, BannersSection, BrandsSection, MagPreviewSection } from "@/components/pages/home";
+import { serverGet } from "@/lib/api/server";
 import { defaultMetadata } from "@/lib/seo";
-
-// Lazy load heavy components
-const SlidersSection = dynamic(() => import("@/components/pages/home").then(mod => mod.SlidersSection), {
-    loading: () => <div className="w-full h-64 bg-slate-100 animate-pulse rounded-2xl" />,
-    ssr: true,
-});
-
-const ServicesSection = dynamic(() => import("@/components/pages/home").then(mod => mod.ServicesSection), {
-    loading: () => <div className="w-full h-48 bg-slate-100 animate-pulse rounded-2xl" />,
-    ssr: true,
-});
-
-const MagPreviewSection = dynamic(() => import("@/components/pages/home").then(mod => mod.MagPreviewSection), {
-    loading: () => <div className="w-full h-48 bg-slate-100 animate-pulse rounded-2xl" />,
-    ssr: true,
-});
-
-const BrandsSection = dynamic(() => import("@/components/pages/home/BrandsSection"), {
-    loading: () => <div className="w-full h-32 bg-slate-100 animate-pulse rounded-2xl" />,
-    ssr: true,
-});
-
-const BannersSection = dynamic(() => import("@/components/pages/home/BannersSection"), {
-    loading: () => <div className="w-full h-48 bg-slate-100 animate-pulse rounded-2xl" />,
-    ssr: true,
-});
 
 export const metadata = {
     title: defaultMetadata.title.fa,
@@ -62,72 +37,91 @@ export const metadata = {
 };
 
 const HomePage = async () => {
-    // Fetch user comments from API (optional - will use fallback if fails)
-    // Note: Comments endpoint requires referenceType and referenceId
-    // We'll skip this for now as we don't have a specific reference
-    let users_comment = [];
+    // Fetch data in parallel for better performance
+    const [articlesRes, servicesRes, brandsRes, bannersRes] = await Promise.allSettled([
+        serverGet('/articles/featured?limit=6', { revalidate: 300 }), // 5 minutes cache
+        serverGet('/services?status=active&limit=50', { revalidate: 600 }), // 10 minutes cache
+        serverGet('/brands/featured?limit=50', { revalidate: 1800 }), // 30 minutes cache
+        serverGet('/banners/active/home-page-banners', { revalidate: 300 }), // 5 minutes cache
+    ]);
 
-    // Fetch featured articles for MagPreviewSection
+    // Process articles
     let featuredArticles = [];
-    try {
-        const featuredResponse = await serverGet('/articles/featured?limit=6');
-        featuredArticles = (featuredResponse.data?.articles || []).map(article => ({
-            id: article._id,
-            _id: article._id,
-            title: article.title?.fa || article.title,
-            description: article.excerpt?.fa || article.shortDescription?.fa || "",
-            thumbnail: article.featuredImage || "/assets/images/post-thumb-1.webp",
-            createdAt: article.publishedAt || article.createdAt,
-            readTime: `${article.readTime || 5} دقیقه`,
-            slug: article.slug?.fa || article.slug?.en || article.slug,
-            article
-        }));
-    } catch (error) {
-        console.error("Error fetching featured articles:", error);
+    if (articlesRes.status === 'fulfilled') {
+        try {
+            const articles = articlesRes.value.data?.articles || [];
+            featuredArticles = articles.map(article => ({
+                id: article._id,
+                _id: article._id,
+                title: article.title?.fa || article.title,
+                description: article.excerpt?.fa || article.shortDescription?.fa || "",
+                thumbnail: article.featuredImage || "/assets/images/post-thumb-1.webp",
+                createdAt: article.publishedAt || article.createdAt,
+                readTime: `${article.readTime || 5} دقیقه`,
+                slug: article.slug?.fa || article.slug?.en || article.slug,
+                article
+            }));
+        } catch (error) {
+            console.error("Error processing articles:", error);
+        }
     }
 
-    // Fetch services for ServicesSection
+    // Process services
     let services = [];
-    try {
-        const servicesResponse = await serverGet('/services?status=active&limit=50');
-        services = servicesResponse.data || [];
-    } catch (error) {
-        console.error("Error fetching services:", error);
+    if (servicesRes.status === 'fulfilled') {
+        try {
+            services = servicesRes.value.data || [];
+        } catch (error) {
+            console.error("Error processing services:", error);
+        }
     }
 
-    // Fetch brands for BrandsSection (using featured endpoint which is public)
+    // Process brands
     let brands = [];
-    try {
-        const brandsResponse = await serverGet('/brands/featured?limit=50');
-        brands = (brandsResponse.data || []).map(brand => brand.logo || "/assets/brands/brand-1.png");
-    } catch (error) {
-        // Silently fail - fallback brands will be used
-        // This is optional data
+    if (brandsRes.status === 'fulfilled') {
+        try {
+            const brandsData = brandsRes.value.data || [];
+            // Ensure brandsData is an array before mapping
+            if (Array.isArray(brandsData)) {
+                brands = brandsData.map(brand => brand.logo || "/assets/brands/brand-1.png");
+            } else if (brandsData && typeof brandsData === 'object') {
+                // If data is an object, try to extract array from it
+                const brandsArray = Array.isArray(brandsData.brands) ? brandsData.brands : 
+                                  Array.isArray(brandsData.data) ? brandsData.data : [];
+                brands = brandsArray.map(brand => brand.logo || "/assets/brands/brand-1.png");
+            }
+        } catch (error) {
+            console.error("Error processing brands:", error);
+        }
     }
 
-    // Fetch banners for home-page-banners section
+    // Process banners
     let banners = [];
-    try {
-        const bannersResponse = await serverGet('/banners/active/home-page-banners');
-        banners = bannersResponse.data?.banners || [];
-    } catch (error) {
-        console.error("Error fetching banners:", error);
-        // Fallback to default banners if API fails
-        banners = [
-            {
-                image: "/assets/banners/logo-ad-banner.webp",
-                mobileImage: "/assets/banners/logo-ad-banner.webp",
-                link: { url: "/service/logo-design", target: "_self" },
-                settings: { altText: { fa: "بنر طراحی لوگو" } }
-            },
-            {
-                image: "/assets/banners/photographing-ad-banner.webp",
-                mobileImage: "/assets/banners/photographing-ad-banner.webp",
-                link: { url: "/service/hika-studio", target: "_self" },
-                settings: { altText: { fa: "بنر هیکا استودیو" } }
-            }
-        ];
+    if (bannersRes.status === 'fulfilled') {
+        try {
+            banners = bannersRes.value.data?.banners || [];
+        } catch (error) {
+            console.error("Error processing banners:", error);
+            // Fallback banners
+            banners = [
+                {
+                    image: "/assets/banners/logo-ad-banner.webp",
+                    mobileImage: "/assets/banners/logo-ad-banner.webp",
+                    link: { url: "/service/logo-design", target: "_self" },
+                    settings: { altText: { fa: "بنر طراحی لوگو" } }
+                },
+                {
+                    image: "/assets/banners/photographing-ad-banner.webp",
+                    mobileImage: "/assets/banners/photographing-ad-banner.webp",
+                    link: { url: "/service/hika-studio", target: "_self" },
+                    settings: { altText: { fa: "بنر هیکا استودیو" } }
+                }
+            ];
+        }
     }
+
+    // Fetch user comments from API (optional - will use fallback if fails)
+    let users_comment = [];
 
     return (
         <main className="w-full flex flex-col gap-10 mb-5 md:my-14 overflow-x-hidden md:overflow-x-visible" id="home-page-main">
@@ -197,9 +191,15 @@ const HomePage = async () => {
                     <Image src="/assets/images/intro-vector-1.png" title="" alt="" width="0" height="0" sizes="100vw" className="w-full md:w-10/12 mr-auto" />
                 </div>
             </section>
-            <ServicesSection services={services} />
-            <BannersSection banners={banners} />
-            <BrandsSection brands={brands} />
+            <Suspense fallback={<div className="w-full h-48 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl" />}>
+                <ServicesSection services={services} />
+            </Suspense>
+            <Suspense fallback={<div className="w-full h-48 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl" />}>
+                <BannersSection banners={banners} />
+            </Suspense>
+            <Suspense fallback={<div className="w-full h-32 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl" />}>
+                <BrandsSection brands={brands} />
+            </Suspense>
             {users_comment.length > 0 && (
                 <section id="comments-section" className="w-full">
                     <h4
@@ -255,7 +255,9 @@ const HomePage = async () => {
                     <CounselingForm />
                 </div>
             </section>
-            <MagPreviewSection articles={featuredArticles} />
+            <Suspense fallback={<div className="w-full h-48 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl" />}>
+                <MagPreviewSection articles={featuredArticles} />
+            </Suspense>
         </main>
     );
 };

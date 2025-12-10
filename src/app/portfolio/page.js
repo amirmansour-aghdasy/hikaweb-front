@@ -91,22 +91,30 @@ const breadcrumbSchema = generateBreadcrumbSchema([
 ]);
 
 export default async function PortfolioPage() {
-    // Fetch all active portfolios
+    // Fetch portfolios and services in parallel for better performance
+    const [portfoliosRes, servicesRes] = await Promise.allSettled([
+        serverGet('/portfolio?status=active&limit=1000', { revalidate: 300 }), // 5 minutes cache
+        serverGet('/services?status=active&limit=100&lang=fa', { revalidate: 600 }), // 10 minutes cache
+    ]);
+
+    // Process portfolios
     let portfolios = [];
-    try {
-        const response = await serverGet('/portfolio?status=active&limit=1000');
-        portfolios = response.data || [];
-    } catch (error) {
-        console.error("Error fetching portfolios:", error);
+    if (portfoliosRes.status === 'fulfilled') {
+        try {
+            portfolios = portfoliosRes.value.data || [];
+        } catch (error) {
+            console.error("Error processing portfolios:", error);
+        }
     }
 
-    // Fetch services for filtering
+    // Process services
     let services = [];
-    try {
-        const servicesResponse = await serverGet('/services?status=active&limit=100&lang=fa');
-        services = servicesResponse.data || [];
-    } catch (error) {
-        console.error("Error fetching services:", error);
+    if (servicesRes.status === 'fulfilled') {
+        try {
+            services = servicesRes.value.data || [];
+        } catch (error) {
+            console.error("Error processing services:", error);
+        }
     }
 
     // Group portfolios by client name

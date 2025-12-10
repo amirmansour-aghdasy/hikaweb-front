@@ -26,6 +26,7 @@
     scroll-behavior: smooth;
     outline: none;
 }
+
 button,
 input {
     outline: none;
@@ -40,6 +41,7 @@ h6,
 p {
     cursor: default;
 }
+
 h1::selection,
 h2::selection,
 h3::selection,

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 import { ReactTyped } from "react-typed";
 
@@ -25,6 +25,7 @@ const AnimatedText = ({
 }) => {
   const typedRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const linkRef = useRef(null);
 
   if (!TypedComp) {
     return (
@@ -65,19 +66,74 @@ const AnimatedText = ({
     ...typedProps,
   };
 
-  // متن جاری
-  const current = strings[activeIndex];
-  const hasLink = typeof current === "object" && current.href;
+  // بررسی اینکه آیا همه strings لینک دارند یا نه
+  const allHaveLinks = strings.length > 0 && strings.every(s => typeof s === "object" && s.href);
+  const someHaveLinks = strings.some(s => typeof s === "object" && s.href);
+  
+  // به‌روزرسانی href لینک وقتی activeIndex تغییر می‌کند
+  useEffect(() => {
+    if (linkRef.current && (allHaveLinks || someHaveLinks)) {
+      const current = strings[activeIndex] || strings[0];
+      if (current && typeof current === "object" && current.href) {
+        // پیدا کردن لینک درون wrapper
+        const linkElement = linkRef.current.querySelector('a');
+        if (linkElement) {
+          linkElement.setAttribute('href', current.href);
+          linkElement.setAttribute('title', current.text);
+        }
+      }
+    }
+  }, [activeIndex, allHaveLinks, someHaveLinks, strings]);
+  
+  // اگر همه لینک دارند، از wrapper استفاده می‌کنیم که لینک را نگه می‌دارد
+  if (allHaveLinks && strings.length > 0) {
+    const current = strings[activeIndex] || strings[0];
+    
+    return (
+      <Tag className={className} {...props}>
+        <span ref={linkRef} style={{ display: 'inline' }}>
+          <Link 
+            href={current.href} 
+            title={current.text} 
+            className={className}
+            style={{ display: 'inline', textDecoration: 'none' }}
+          >
+            <TypedComp ref={typedRef} {...typedCommonProps} />
+          </Link>
+        </span>
+      </Tag>
+    );
+  }
 
+  // اگر بعضی لینک دارند، از wrapper پویا استفاده می‌کنیم
+  if (someHaveLinks) {
+    const current = strings[activeIndex] || strings[0];
+    const hasLink = typeof current === "object" && current.href;
+    
+    return (
+      <Tag className={className} {...props}>
+        {hasLink ? (
+          <span ref={linkRef} style={{ display: 'inline' }}>
+            <Link 
+              href={current.href} 
+              title={current.text} 
+              className={className}
+              style={{ display: 'inline', textDecoration: 'none' }}
+            >
+              <TypedComp ref={typedRef} {...typedCommonProps} />
+            </Link>
+          </span>
+        ) : (
+          <TypedComp ref={typedRef} {...typedCommonProps} />
+        )}
+      </Tag>
+    );
+  }
+
+  // اگر هیچ لینکی ندارند
   return (
     <Tag className={className} {...props}>
-      {hasLink ? (
-        <Link href={current.href} title={current.text} className={className}>
-          <TypedComp ref={typedRef} {...typedCommonProps} />
-        </Link>
-      ) : (
-        <TypedComp ref={typedRef} {...typedCommonProps} />
-      )}
+      <TypedComp ref={typedRef} {...typedCommonProps} />
     </Tag>
   );
 };

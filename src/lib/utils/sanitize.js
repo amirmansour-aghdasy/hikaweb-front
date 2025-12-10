@@ -32,17 +32,47 @@ export function sanitizeText(text) {
 }
 
 /**
+ * Convert Persian/Arabic digits to English digits
+ * @param {string} str - String containing digits
+ * @returns {string} - String with English digits
+ */
+function convertPersianToEnglishDigits(str) {
+    if (!str || typeof str !== 'string') return str;
+    
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    
+    let result = str;
+    
+    // Convert Persian digits
+    persianDigits.forEach((persianDigit, index) => {
+        result = result.replace(new RegExp(persianDigit, 'g'), index.toString());
+    });
+    
+    // Convert Arabic digits
+    arabicDigits.forEach((arabicDigit, index) => {
+        result = result.replace(new RegExp(arabicDigit, 'g'), index.toString());
+    });
+    
+    return result;
+}
+
+/**
  * Validate phone number format (Iranian format)
+ * Supports both Persian and English digits
  * @param {string} phone - Phone number to validate
  * @returns {boolean} - True if valid
  */
 export function validatePhoneNumber(phone) {
     if (!phone || typeof phone !== 'string') return false;
     
-    // Remove spaces and dashes
-    const cleaned = phone.replace(/[\s-]/g, '');
+    // Convert Persian/Arabic digits to English
+    const convertedPhone = convertPersianToEnglishDigits(phone);
     
-    // Check Iranian phone format: 09xxxxxxxxx or +989xxxxxxxxx
+    // Remove spaces and dashes
+    const cleaned = convertedPhone.replace(/[\s-]/g, '');
+    
+    // Check Iranian phone format: 09xxxxxxxxx or +989xxxxxxxxx or 00989xxxxxxxxx
     return /^(09|\+989|00989)\d{9}$/.test(cleaned);
 }
 

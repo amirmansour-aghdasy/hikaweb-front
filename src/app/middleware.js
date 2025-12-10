@@ -12,11 +12,11 @@ export async function middleware(request) {
   }
 
   // Check maintenance mode for main site only
-  // Cache maintenance check for 30 seconds to reduce API calls
+  // Use minimal cache (5 seconds) to ensure quick updates while reducing API calls
   if (siteType === 'main') {
     try {
       const maintenanceResponse = await fetch(`${API_URL}/settings/maintenance`, {
-        next: { revalidate: 30 }, // Cache for 30 seconds
+        next: { revalidate: 5 }, // Cache for 5 seconds for faster updates
         headers: {
           'Accept': 'application/json',
         },
@@ -29,13 +29,25 @@ export async function middleware(request) {
 
         if (maintenance?.enabled) {
           // Get client IP (if available from headers)
-          const clientIP = request.headers.get('x-forwarded-for') || 
-                          request.headers.get('x-real-ip') || 
-                          'unknown';
+          // x-forwarded-for can contain multiple IPs separated by commas (client, proxy1, proxy2)
+          // We need the first IP which is the original client IP
+          const forwardedFor = request.headers.get('x-forwarded-for');
+          const realIP = request.headers.get('x-real-ip');
+          
+          let clientIP = 'unknown';
+          if (forwardedFor) {
+            // Take the first IP from the list
+            clientIP = forwardedFor.split(',')[0].trim();
+          } else if (realIP) {
+            clientIP = realIP.trim();
+          }
           
           // Check if IP is allowed
           const allowedIPs = maintenance.allowedIPs || [];
-          const isIPAllowed = allowedIPs.length === 0 || allowedIPs.includes(clientIP);
+          
+          // If allowedIPs is empty, no one is allowed (maintenance mode blocks everyone)
+          // If allowedIPs has values, check if current IP is in the list
+          const isIPAllowed = allowedIPs.length > 0 && allowedIPs.includes(clientIP);
 
           // Redirect to maintenance page if IP is not allowed
           if (!isIPAllowed && pathname !== '/maintenance') {
@@ -45,6 +57,7 @@ export async function middleware(request) {
       }
     } catch (error) {
       // If API call fails, continue normally (don't block site)
+      // This ensures the site remains accessible even if the API is down
       console.error('Maintenance check error:', error);
     }
   }

@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import ServiceCard from "./ServiceCard";
-import ServiceCardSkeleton from "./ServiceCardSkeleton";
 import QuickViewModal from "./QuickViewModal";
 import { 
     HiMagnifyingGlass, 
@@ -391,13 +390,8 @@ export default function ServicesListingClient({ services = [] }) {
 
             {/* Services Grid/List */}
             {isLoading ? (
-                <div className={viewMode === "grid" 
-                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
-                    : "space-y-4"
-                }>
-                    {[...Array(6)].map((_, i) => (
-                        <ServiceCardSkeleton key={i} />
-                    ))}
+                <div className="w-full flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-600"></div>
                 </div>
             ) : paginatedServices.length > 0 ? (
                 <>
