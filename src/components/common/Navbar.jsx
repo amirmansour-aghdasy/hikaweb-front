@@ -54,7 +54,7 @@ const Navbar = () => {
                                     <MenuItems
                                         transition
                                         anchor="bottom start"
-                                        className="w-52 z-10 origin-top-right rounded-xl bg-slate-200 dark:bg-slate-800 border-b-4 shadow border-teal-500 dark:border-teal-600 p-1 text-sm/6 text-slate-500 dark:text-slate-400 transition duration-100 ease-out [--anchor-gap:--spacing(1)] focus:outline-none data-closed:scale-95 data-closed:opacity-0"
+                                        className="w-52 z-10 origin-top-right rounded-xl bg-slate-200 dark:bg-slate-800 border-b-4 shadow border-teal-500 dark:border-teal-600 p-1 text-sm/6 text-slate-500 dark:text-slate-400 transition duration-100 ease-out focus:outline-none data-closed:scale-95 data-closed:opacity-0"
                                     >
                                         {children.map(({ title, url }, index) => (
                                             <MenuItem key={index}>

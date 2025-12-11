@@ -1,7 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     darkMode: 'class', // Enable class-based dark mode
-    content: [, "./src/components/**/*.{js,ts,jsx,tsx,mdx}", "./src/app/**/*.{js,ts,jsx,tsx,mdx}", "./src/providers/**/*.{js,ts,jsx,tsx,mdx}"],
+    content: [
+        "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+        "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+        "./src/providers/**/*.{js,ts,jsx,tsx,mdx}",
+        "./src/containers/**/*.{js,ts,jsx,tsx,mdx}",
+        "./src/contexts/**/*.{js,ts,jsx,tsx,mdx}",
+    ],
     theme: {
         extend: {
             keyframes: {
@@ -9,10 +15,21 @@ module.exports = {
                     "0%, 100%": { backgroundColor: "#042f2e" }, // رنگ اول
                     "50%": { backgroundColor: "#0f766e" }, // رنگ دوم
                 },
+                slideUp: {
+                    "0%": {
+                        opacity: "0",
+                        transform: "translateY(10px)",
+                    },
+                    "100%": {
+                        opacity: "1",
+                        transform: "translateY(0)",
+                    },
+                },
             },
             animation: {
                 bgPulse: "bgPulse 7s ease-in-out infinite",
                 scroll: "scroll 40s linear infinite",
+                slideUp: "slideUp 0.3s ease-out",
             },
             backgroundImage: {},
             container: {

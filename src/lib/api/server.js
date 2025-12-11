@@ -1,5 +1,6 @@
 // Server-side API client for Next.js 15 Server Components
 // Uses native fetch with Next.js caching strategies
+// SECURITY: Hardened against CVE-2025-55182 (React2Shell RCE vulnerability)
 
 const getApiBaseUrl = () => {
   if (process.env.NODE_ENV === 'development') {
@@ -20,6 +21,72 @@ const getApiBaseUrl = () => {
 const API_BASE_URL = getApiBaseUrl();
 
 /**
+ * Whitelist of allowed API endpoints to prevent RCE attacks
+ * Only endpoints in this list can be called from Server Components
+ */
+const ALLOWED_ENDPOINTS = [
+  // Articles
+  /^\/articles(\?.*)?$/,
+  /^\/articles\/featured(\?.*)?$/,
+  /^\/articles\/popular(\?.*)?$/,
+  /^\/articles\/slug\/[a-zA-Z0-9\-_]+(\?.*)?$/,
+  // Services
+  /^\/services(\?.*)?$/,
+  /^\/services\/slug\/[a-zA-Z0-9\-_]+(\?.*)?$/,
+  // Portfolio
+  /^\/portfolio(\?.*)?$/,
+  /^\/portfolio\/slug\/[a-zA-Z0-9\-_]+(\?.*)?$/,
+  // Brands
+  /^\/brands(\?.*)?$/,
+  /^\/brands\/featured(\?.*)?$/,
+  // Banners
+  /^\/banners\/active\/[a-zA-Z0-9\-_]+(\?.*)?$/,
+  // Categories
+  /^\/categories(\?.*)?$/,
+  // FAQ
+  /^\/faq\/service\/[a-zA-Z0-9]{24}(\?.*)?$/, // MongoDB ObjectId format
+  // Settings (public only)
+  /^\/settings\/public$/,
+  /^\/settings\/maintenance$/,
+  // Sitemap data
+  /^\/sitemap\/.*$/,
+];
+
+/**
+ * Validate endpoint to prevent SSRF and RCE attacks
+ * @param {string} endpoint - API endpoint to validate
+ * @throws {Error} If endpoint is not allowed
+ */
+function validateEndpoint(endpoint) {
+  // Remove leading slash for pattern matching
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  
+  // Remove query string for pattern matching
+  const endpointPath = cleanEndpoint.split('?')[0];
+  
+  // Check if endpoint matches any allowed pattern
+  const isAllowed = ALLOWED_ENDPOINTS.some(pattern => pattern.test(cleanEndpoint));
+  
+  if (!isAllowed) {
+    // Log security violation attempt
+    console.error(`[SECURITY] Blocked unauthorized endpoint access: ${endpoint}`);
+    throw new Error(`Unauthorized endpoint: ${endpoint}`);
+  }
+  
+  // Additional security: Prevent protocol-relative and absolute URLs
+  if (endpoint.includes('://') || endpoint.startsWith('//')) {
+    console.error(`[SECURITY] Blocked SSRF attempt: ${endpoint}`);
+    throw new Error('Invalid endpoint format');
+  }
+  
+  // Prevent path traversal
+  if (endpoint.includes('..') || endpoint.includes('~')) {
+    console.error(`[SECURITY] Blocked path traversal attempt: ${endpoint}`);
+    throw new Error('Invalid endpoint format');
+  }
+}
+
+/**
  * Server-side fetch with Next.js 15 caching
  * @param {string} endpoint - API endpoint (e.g., '/articles')
  * @param {object} options - Fetch options
@@ -28,6 +95,9 @@ const API_BASE_URL = getApiBaseUrl();
  * @returns {Promise<object>} API response
  */
 export async function serverFetch(endpoint, options = {}) {
+  // SECURITY: Validate endpoint before processing
+  validateEndpoint(endpoint);
+  
   const safeEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = `${API_BASE_URL}${safeEndpoint}`;
   
@@ -38,19 +108,42 @@ export async function serverFetch(endpoint, options = {}) {
     ? { next: { revalidate } } 
     : { cache: 'no-store' };
   
+  // SECURITY: Prevent user-controlled headers that could be exploited
+  const safeHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+  
+  // Only allow specific safe headers from options
+  if (options.headers) {
+    const allowedHeaders = ['Authorization', 'X-Requested-With'];
+    Object.keys(options.headers).forEach(key => {
+      if (allowedHeaders.includes(key)) {
+        safeHeaders[key] = options.headers[key];
+      }
+    });
+  }
+  
   const config = {
     ...options,
     method: options.method || 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      ...options.headers,
-    },
+    headers: safeHeaders,
     ...cacheStrategy,
+    // SECURITY: Prevent redirects to external URLs (SSRF protection)
+    redirect: 'error',
   };
 
   try {
-    const response = await fetch(url, config);
+    // SECURITY: Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(url, {
+      ...config,
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));

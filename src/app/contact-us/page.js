@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { ContactUsForm } from "@/components/forms";
+import MapWrapper from "@/components/map/MapWrapper";
 import { CallCallingFill, InstagramOutlined, LocationFill, RubikaFill, TelegramFill, WhatsAppOutlined } from "@/lib/icons";
 import { defaultMetadata } from "@/lib/seo";
 
@@ -29,16 +30,7 @@ const ContactUsPage = () => {
                 </div>
                 <div className="w-full flex-1 col-span-12 md:col-span-8 bg-[#A5D1D1] dark:bg-teal-900/30 rounded-2xl p-3.5 flex flex-col items-center justify-between gap-3.5">
                     <div className="w-full h-72 rounded-2xl overflow-hidden" data-aos="zoom-out">
-                        <iframe
-                            className="w-full h-full"
-                            src="https://www.google.com/maps?q=35.7294839,51.3350453&hl=fa&z=15&output=embed"
-                            width="600"
-                            height="450"
-                            style={{ border: 0 }}
-                            allowFullScreen=""
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                        ></iframe>
+                        <MapWrapper />
                     </div>
                     <div className="w-full">
                         <p className="w-full flex items-center gap-2 md:gap-2.5 text-[#0E443C] dark:text-teal-100 text-sm md:text-xl font-bold md:font-normal p-2.5 bg-[#F5F5F5] dark:bg-slate-800 shadow rounded-xl" data-aos="zoom-in">

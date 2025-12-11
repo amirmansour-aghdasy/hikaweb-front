@@ -4,28 +4,63 @@ import { useState, useEffect, useRef } from "react";
 import { HiBell } from "react-icons/hi2";
 import { apiClient } from "@/services/api/client";
 import NotificationDrawer from "./NotificationDrawer";
+import useAuthStore from "@/lib/store/authStore";
+import Cookies from "js-cookie";
 
 export default function NotificationBell() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const bellRef = useRef(null);
+    const { isAuthenticated } = useAuthStore();
+
+    // Helper to check if user is actually authenticated (has token)
+    const isUserAuthenticated = () => {
+        if (!isAuthenticated) return false;
+        // Double check token exists in cookie
+        const accessToken = Cookies.get("accessToken");
+        return !!accessToken;
+    };
 
     useEffect(() => {
-        fetchUnreadCount();
-        
-        // Refresh count every 30 seconds
-        const interval = setInterval(fetchUnreadCount, 30000);
-        
-        return () => clearInterval(interval);
-    }, []);
+        // Only fetch if user is authenticated and has token
+        if (isUserAuthenticated()) {
+            fetchUnreadCount();
+            
+            // Refresh count every 30 seconds
+            const interval = setInterval(() => {
+                if (isUserAuthenticated()) {
+                    fetchUnreadCount();
+                } else {
+                    setUnreadCount(0);
+                }
+            }, 30000);
+            
+            return () => clearInterval(interval);
+        } else {
+            setLoading(false);
+            setUnreadCount(0);
+        }
+    }, [isAuthenticated]);
 
     const fetchUnreadCount = async () => {
+        // Double check authentication and token before making request
+        if (!isUserAuthenticated()) {
+            setUnreadCount(0);
+            setLoading(false);
+            return;
+        }
+
         try {
             const response = await apiClient.get("/notifications/unread-count");
             setUnreadCount(response.data?.data?.count || 0);
         } catch (error) {
-            console.error("Error fetching unread count:", error);
+            // Silently handle 401 errors (user not authenticated or token expired)
+            // Only log other errors
+            if (error.status !== 401) {
+                console.error("Error fetching unread count:", error);
+            }
+            setUnreadCount(0);
         } finally {
             setLoading(false);
         }

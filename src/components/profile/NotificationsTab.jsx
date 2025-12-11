@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { HiBell, HiCheck, HiTrash, HiChevronRight } from "react-icons/hi";
+import { useState, useEffect, useMemo } from "react";
+import { HiBell, HiCheck, HiTrash, HiChevronRight, HiSearch } from "react-icons/hi";
 import { HiBell as HiBellV2 } from "react-icons/hi2";
 import { apiClient } from "@/services/api/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import Pagination from "./Pagination";
 
 const getNotificationIcon = (type) => {
     const iconClass = "w-5 h-5";
@@ -57,36 +58,44 @@ const formatTime = (date) => {
     }
 };
 
-export default function NotificationsTab({ user }) {
+export default function NotificationsTab({ user, searchQuery = "" }) {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
+    const [totalPages, setTotalPages] = useState(1);
     const [markingAsRead, setMarkingAsRead] = useState(null);
+    const LIMIT = 10; // Default limit per page
 
     useEffect(() => {
-        fetchNotifications();
-    }, []);
+        fetchNotifications(page, searchQuery);
+    }, [page, searchQuery]);
 
-    const fetchNotifications = async (pageNum = 1) => {
+    const fetchNotifications = async (pageNum = 1, currentSearchQuery = "") => {
         setLoading(true);
         try {
-            const response = await apiClient.get(`/notifications?page=${pageNum}&limit=20`);
-            const fetchedNotifications = response.data?.data || [];
-            const pagination = response.data?.pagination || {};
+            const searchParam = currentSearchQuery ? `&search=${encodeURIComponent(currentSearchQuery)}` : "";
+            const response = await apiClient.get(`/notifications?page=${pageNum}&limit=${LIMIT}${searchParam}`);
+            // Response structure: { success: true, data: [...], pagination: {...} }
+            const fetchedNotifications = response.data || [];
+            const pagination = response.pagination || {};
             
-            if (pageNum === 1) {
-                setNotifications(fetchedNotifications);
-            } else {
-                setNotifications(prev => [...prev, ...fetchedNotifications]);
-            }
-            
-            setHasMore(pagination.hasNext || false);
+            const calculatedTotalPages = pagination.totalPages || (pagination.total ? Math.ceil(pagination.total / LIMIT) : 1);
+            setNotifications(fetchedNotifications);
+            setTotalPages(calculatedTotalPages);
         } catch (error) {
             console.error("Error fetching notifications:", error);
             toast.error("خطا در دریافت اعلان‌ها");
+            setNotifications([]);
+            setTotalPages(1);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages && newPage !== page) {
+            setPage(newPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
@@ -134,24 +143,20 @@ export default function NotificationsTab({ user }) {
         }
     };
 
-    const loadMore = () => {
-        if (!loading && hasMore) {
-            const nextPage = page + 1;
-            setPage(nextPage);
-            fetchNotifications(nextPage);
-        }
-    };
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
+    // Use notifications directly since search is handled by API
+    const filteredNotifications = notifications;
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-slate-800">اعلان‌ها</h2>
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">اعلان‌ها</h2>
                 {unreadCount > 0 && (
                     <button
                         onClick={handleMarkAllAsRead}
-                        className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm whitespace-nowrap"
                     >
                         <HiCheck className="w-4 h-4" />
                         همه را خوانده شده ({unreadCount})
@@ -173,15 +178,19 @@ export default function NotificationsTab({ user }) {
                         </div>
                     ))}
                 </div>
-            ) : notifications.length === 0 ? (
+            ) : filteredNotifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                     <HiBell className="w-16 h-16 text-slate-300 mb-4" />
-                    <p className="text-slate-500 text-lg font-medium">اعلانی وجود ندارد</p>
-                    <p className="text-slate-400 text-sm mt-2">وقتی اعلان جدیدی داشته باشید، اینجا نمایش داده می‌شود</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">
+                        {searchQuery ? "نتیجه‌ای یافت نشد" : "اعلانی وجود ندارد"}
+                    </p>
+                    <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">
+                        {searchQuery ? "لطفاً عبارت جستجوی دیگری امتحان کنید" : "وقتی اعلان جدیدی داشته باشید، اینجا نمایش داده می‌شود"}
+                    </p>
                 </div>
             ) : (
                 <div className="space-y-3">
-                    {notifications.map((notification) => {
+                    {filteredNotifications.map((notification) => {
                         const isUnread = !notification.isRead;
                         const title = notification.title?.fa || notification.title || "اعلان";
                         const message = notification.message?.fa || notification.message || "";
@@ -253,15 +262,16 @@ export default function NotificationsTab({ user }) {
                         );
                     })}
                     
-                    {hasMore && (
-                        <button
-                            onClick={loadMore}
-                            disabled={loading}
-                            className="w-full py-3 text-sm text-teal-600 hover:text-teal-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? "در حال بارگذاری..." : "بارگذاری بیشتر"}
-                        </button>
-                    )}
+                    {totalPages > 1 ? (
+                        <div className="mt-8">
+                            <Pagination
+                                currentPage={page}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                                loading={loading}
+                            />
+                        </div>
+                    ) : null}
                 </div>
             )}
         </div>

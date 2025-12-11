@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { BsPerson, BsEnvelope, BsTelephone, BsCalendar, BsPencil, BsCreditCard, BsReceipt, BsBookmark, BsShieldCheck, BsLaptop, BsTicket, BsChatDots, BsBell } from "react-icons/bs";
 import { HiOutlineVideoCamera } from "react-icons/hi2";
+import { HiSearch, HiX } from "react-icons/hi";
 import { MdOutlineArticle } from "react-icons/md";
 import { FaBriefcase } from "react-icons/fa";
 
@@ -27,6 +28,7 @@ const ProfilePage = () => {
     const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState(null);
     const [activeTab, setActiveTab] = useState(0);
+    const [searchQuery, setSearchQuery] = useState("");
     const [stats, setStats] = useState({
         payments: 0,
         invoices: 0,
@@ -67,6 +69,22 @@ const ProfilePage = () => {
         }
     }, [isAuthenticated, user, loading, router]);
 
+    // Check for tab query parameter and set active tab
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+            if (tabParam === 'notifications') {
+                setActiveTab(8); // notifications tab index
+            }
+        }
+    }, []);
+
+    // Reset search query when switching tabs
+    useEffect(() => {
+        setSearchQuery("");
+    }, [activeTab]);
+
     const fetchStatsRef = useRef(null);
 
     fetchStatsRef.current = async () => {
@@ -76,10 +94,11 @@ const ProfilePage = () => {
             setStatsLoading(true);
             // فقط APIهایی که موجود هستند را صدا می‌زنیم - با silent error handling
             // برای پنل کاربری، فقط داده‌های مختص کاربر فعلی را می‌گیریم
-            const [ticketsRes, consultationsRes, notificationsRes] = await Promise.allSettled([
+            const [ticketsRes, consultationsRes, notificationsRes, bookmarksRes] = await Promise.allSettled([
                 apiClient.get("/tickets?limit=1").catch(() => Promise.reject(new Error("silent"))),
-                apiClient.get("/consultations?limit=1").catch(() => Promise.reject(new Error("silent"))),
+                apiClient.get("/consultations/my?limit=1").catch(() => Promise.reject(new Error("silent"))),
                 apiClient.get("/notifications?limit=1").catch(() => Promise.reject(new Error("silent"))),
+                apiClient.get("/bookmarks?limit=1").catch(() => Promise.reject(new Error("silent"))),
             ]);
 
             setStats({
@@ -91,9 +110,11 @@ const ProfilePage = () => {
                     : 0,
                 // برای پنل کاربری، total باید تعداد مشاوره‌های کاربر باشد نه کل
                 consultations: consultationsRes.status === "fulfilled"
-                    ? (consultationsRes.value?.data?.pagination?.total || consultationsRes.value?.data?.consultations?.length || consultationsRes.value?.pagination?.total || 0)
+                    ? (consultationsRes.value?.data?.pagination?.total || consultationsRes.value?.data?.consultations?.length || consultationsRes.value?.data?.length || consultationsRes.value?.pagination?.total || 0)
                     : 0,
-                bookmarks: 0, // API موجود نیست
+                bookmarks: bookmarksRes.status === "fulfilled"
+                    ? (bookmarksRes.value?.pagination?.total || 0)
+                    : 0,
                 notifications: notificationsRes.status === "fulfilled"
                     ? (notificationsRes.value?.data?.pagination?.total || notificationsRes.value?.data?.notifications?.length || notificationsRes.value?.pagination?.total || 0)
                     : 0,
@@ -210,7 +231,7 @@ const ProfilePage = () => {
                     >
                         <StatsCard
                             title="نشان‌گذاری‌ها"
-                            value={0}
+                            value={statsLoading ? "..." : stats.bookmarks}
                             icon={<BsBookmark className="w-5 h-5" />}
                             color="teal"
                         />
@@ -261,15 +282,44 @@ const ProfilePage = () => {
                     {/* Tab Content */}
                     <div className="md:col-span-9">
                         <div className="w-full bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-3.5 md:p-8">
+                            {/* Search Bar - Only show for tabs that support search */}
+                            {(activeTab === 3 || activeTab === 6 || activeTab === 7 || activeTab === 8) && (
+                                <div className="mb-6">
+                                    <div className="relative">
+                                        <HiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
+                                        <input
+                                            type="text"
+                                            placeholder={
+                                                activeTab === 3 ? "جستجو در نشان‌گذاری‌ها..." :
+                                                activeTab === 6 ? "جستجو در تیکت‌ها..." :
+                                                activeTab === 7 ? "جستجو در درخواست‌های مشاوره..." :
+                                                "جستجو در اعلان‌ها..."
+                                            }
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-400 rounded-lg pr-10 pl-4 py-2.5 text-sm border border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400"
+                                        />
+                                        {searchQuery && (
+                                            <button
+                                                onClick={() => setSearchQuery("")}
+                                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                            >
+                                                <HiX className="w-5 h-5" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            
                             {activeTab === 0 && <ProfileInfoTab user={userData} onUpdate={(updatedUser) => setUserData(updatedUser)} />}
                             {activeTab === 1 && <PaymentsTab user={userData} />}
                             {activeTab === 2 && <InvoicesTab user={userData} />}
-                            {activeTab === 3 && <BookmarksTab user={userData} />}
+                            {activeTab === 3 && <BookmarksTab user={userData} searchQuery={searchQuery} />}
                             {activeTab === 4 && <SecurityTab user={userData} />}
                             {activeTab === 5 && <ConnectedDevicesTab user={userData} />}
-                                {activeTab === 6 && <TicketsTab user={userData} onStatsChange={() => fetchStatsRef.current?.()} />}
-                            {activeTab === 7 && <ConsultationsTab user={userData} />}
-                            {activeTab === 8 && <NotificationsTab user={userData} />}
+                            {activeTab === 6 && <TicketsTab user={userData} onStatsChange={() => fetchStatsRef.current?.()} searchQuery={searchQuery} />}
+                            {activeTab === 7 && <ConsultationsTab user={userData} searchQuery={searchQuery} />}
+                            {activeTab === 8 && <NotificationsTab user={userData} searchQuery={searchQuery} />}
                         </div>
                     </div>
                 </div>

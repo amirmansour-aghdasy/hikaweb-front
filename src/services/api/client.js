@@ -67,7 +67,13 @@ class ApiClient {
       signal: AbortSignal.timeout(options.timeout || 10000), // 10 seconds default
     };
 
+    // Check if this is a protected endpoint that requires authentication
+    const isProtectedEndpoint = endpoint.includes('/profile') || endpoint.includes('/tickets') || 
+                               endpoint.includes('/consultations') || endpoint.includes('/bookmarks') ||
+                               endpoint.includes('/notifications');
+    
     // Add auth token if available (for client-side requests)
+    let hasToken = false;
     if (typeof window !== 'undefined') {
       const cookies = document.cookie.split(';');
       const accessToken = cookies
@@ -76,7 +82,14 @@ class ApiClient {
       
       if (accessToken) {
         config.headers['Authorization'] = `Bearer ${accessToken}`;
+        hasToken = true;
       }
+    }
+
+    // For protected endpoints, don't make request if no token exists
+    // This prevents unnecessary 401 errors in console
+    if (isProtectedEndpoint && !hasToken && typeof window !== 'undefined') {
+      return Promise.resolve({ success: false, data: null, message: 'Authentication required' });
     }
 
     // Create the request promise
@@ -89,6 +102,7 @@ class ApiClient {
           // Handle 401 errors (authentication required or token expired)
           if (response.status === 401) {
             // Check if we have a token (means user was authenticated but token expired)
+            // If no token exists, this is expected and we should return gracefully
             const hasToken = typeof window !== 'undefined' && 
                            document.cookie.split(';').some(c => c.trim().startsWith('accessToken='));
             
@@ -101,20 +115,19 @@ class ApiClient {
             // For public endpoints, return gracefully
             // For protected endpoints, throw error so caller can handle it
             const isAuthEndpoint = endpoint.includes('/auth/') && !endpoint.includes('/auth/send-otp') && !endpoint.includes('/auth/verify-otp');
-            const isProtectedEndpoint = endpoint.includes('/profile') || endpoint.includes('/tickets') || 
-                                       endpoint.includes('/consultations') || endpoint.includes('/bookmarks') ||
-                                       endpoint.includes('/notifications');
             
-            if (isAuthEndpoint || isProtectedEndpoint) {
-              // Throw error for auth/protected endpoints so authStore can handle it
+            if (isAuthEndpoint || (isProtectedEndpoint && hasToken)) {
+              // Throw error for auth/protected endpoints when token exists (means expired/invalid)
+              // This allows authStore to handle token refresh or logout
               const error = new Error(errorData.message || 'Authentication required');
               error.status = 401;
               error.data = errorData;
               throw error;
             }
             
-            // For public endpoints, return gracefully
-            console.warn('Authentication required for:', url);
+            // For protected endpoints without token, return gracefully (user not logged in)
+            // For public endpoints, also return gracefully
+            // Don't log warnings for expected 401 errors (no token)
             return { success: false, data: null, message: errorData.message || 'Authentication required' };
           }
           // Handle 429 rate limit errors

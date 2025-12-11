@@ -4,3 +4,4 @@ export { default as AuthActionButton } from "./AuthActionButton";
 export { default as ToggleLanguageButton } from "./ToggleLanguageButton";
 export { default as PortfolioSlidersPrevEl } from "./PortfolioSlidersPrevEl";
 export { default as PortfolioSlidersNextEl } from "./PortfolioSlidersPrevEl";
+export { default as WhatsAppChatWidget } from "./WhatsAppChatWidget";

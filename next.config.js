@@ -29,6 +29,50 @@ const nextConfig = {
   // Experimental features for better performance
   experimental: {
     optimizeCss: true,
+    // Use Turbopack for faster builds (enabled via --turbopack flag in scripts)
+    // SECURITY: Disable server actions if not needed to reduce attack surface
+    serverActions: {
+      bodySizeLimit: '1mb', // Limit request body size to prevent DoS
+    },
+    // Optimize package imports
+    optimizePackageImports: [
+      '@heroicons/react',
+      'react-icons',
+      'swiper',
+      'aos',
+    ],
+  },
+  // Build optimizations
+  swcMinify: true, // Already default in Next.js 15, but explicit
+  // Reduce bundle size by excluding unnecessary modules
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Tree shaking optimizations
+      config.optimization = {
+        ...config.optimization,
+        usedExports: true,
+        sideEffects: false,
+      };
+    }
+    return config;
+  },
+  // SECURITY: Additional security headers (complementary to middleware)
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-Download-Options',
+            value: 'noopen'
+          },
+        ],
+      },
+    ];
   },
 };
 

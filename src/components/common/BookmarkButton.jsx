@@ -6,6 +6,7 @@ import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { apiClient } from "@/services/api/client";
 import useAuthStore from "@/lib/store/authStore";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 
 export default function BookmarkButton({ 
     articleId, 
@@ -19,11 +20,21 @@ export default function BookmarkButton({
     const [isLoading, setIsLoading] = useState(false);
     const [isChecking, setIsChecking] = useState(true);
 
+    // Helper to check if user is actually authenticated (has token)
+    const isUserAuthenticated = () => {
+        if (!isAuthenticated || !user) return false;
+        // Double check token exists in cookie
+        const accessToken = Cookies.get("accessToken");
+        return !!accessToken;
+    };
+
     // Check bookmark status on mount
     useEffect(() => {
         const checkBookmark = async () => {
-            if (!isAuthenticated || !user || !articleId) {
+            // Check authentication and token before making request
+            if (!isUserAuthenticated() || !articleId) {
                 setIsChecking(false);
+                setIsBookmarked(false);
                 return;
             }
 
@@ -31,7 +42,11 @@ export default function BookmarkButton({
                 const response = await apiClient.get(`/articles/${articleId}/bookmark/check`);
                 setIsBookmarked(response.data?.isBookmarked || false);
             } catch (error) {
-                // Ignore errors (user might not have permission)
+                // Silently handle 401 errors (user not authenticated or token expired)
+                // Don't log anything for 401 errors
+                if (error.status !== 401) {
+                    console.error("Error checking bookmark:", error);
+                }
                 setIsBookmarked(false);
             } finally {
                 setIsChecking(false);

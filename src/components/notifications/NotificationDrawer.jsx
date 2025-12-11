@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { HiX, HiCheck, HiTrash, HiChevronRight } from "react-icons/hi";
+import { HiX, HiCheck, HiTrash, HiChevronRight, HiSearch } from "react-icons/hi";
 import { HiBell } from "react-icons/hi2";
 import { apiClient } from "@/services/api/client";
 import toast from "react-hot-toast";
@@ -66,8 +66,10 @@ const getNotificationColor = (type, priority) => {
 
 export default function NotificationDrawer({ isOpen, onClose, onCountUpdate, anchorRef }) {
     const [notifications, setNotifications] = useState([]);
+    const [filteredNotifications, setFilteredNotifications] = useState([]);
     const [loading, setLoading] = useState(false);
     const [markingAsRead, setMarkingAsRead] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const drawerRef = useRef(null);
 
     useEffect(() => {
@@ -106,6 +108,7 @@ export default function NotificationDrawer({ isOpen, onClose, onCountUpdate, anc
             const response = await apiClient.get("/notifications?limit=20&isRead=false");
             const fetchedNotifications = response.data?.data || [];
             setNotifications(fetchedNotifications);
+            setFilteredNotifications(fetchedNotifications);
         } catch (error) {
             console.error("Error fetching notifications:", error);
             toast.error("خطا در دریافت اعلان‌ها");
@@ -114,11 +117,30 @@ export default function NotificationDrawer({ isOpen, onClose, onCountUpdate, anc
         }
     };
 
+    // Filter notifications based on search query
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setFilteredNotifications(notifications);
+            return;
+        }
+
+        const query = searchQuery.toLowerCase().trim();
+        const filtered = notifications.filter(notification => {
+            const title = (notification.title?.fa || notification.title || "").toLowerCase();
+            const message = (notification.message?.fa || notification.message || "").toLowerCase();
+            return title.includes(query) || message.includes(query);
+        });
+        setFilteredNotifications(filtered);
+    }, [searchQuery, notifications]);
+
     const handleMarkAsRead = async (notificationId) => {
         setMarkingAsRead(notificationId);
         try {
             await apiClient.patch(`/notifications/${notificationId}/read`);
             setNotifications(prev =>
+                prev.map(n => n._id === notificationId ? { ...n, isRead: true } : n)
+            );
+            setFilteredNotifications(prev =>
                 prev.map(n => n._id === notificationId ? { ...n, isRead: true } : n)
             );
             
@@ -139,6 +161,7 @@ export default function NotificationDrawer({ isOpen, onClose, onCountUpdate, anc
         try {
             await apiClient.patch("/notifications/read-all");
             setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            setFilteredNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
             if (onCountUpdate) {
                 onCountUpdate(0);
             }
@@ -153,6 +176,7 @@ export default function NotificationDrawer({ isOpen, onClose, onCountUpdate, anc
         try {
             await apiClient.delete(`/notifications/${notificationId}`);
             setNotifications(prev => prev.filter(n => n._id !== notificationId));
+            setFilteredNotifications(prev => prev.filter(n => n._id !== notificationId));
             
             // Update unread count
             const deletedNotification = notifications.find(n => n._id === notificationId);
@@ -183,31 +207,46 @@ export default function NotificationDrawer({ isOpen, onClose, onCountUpdate, anc
                 className="fixed top-0 left-0 h-full w-full md:w-96 bg-white shadow-2xl z-50 flex flex-col animate-slide-in-left"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-gradient-to-r from-teal-600 to-teal-700">
-                    <div className="flex items-center gap-3">
-                        <HiBell className="w-6 h-6 text-white" />
-                        <h2 className="text-white font-bold text-lg">اعلان‌ها</h2>
-                        {notifications.filter(n => !n.isRead).length > 0 && (
-                            <span className="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                {notifications.filter(n => !n.isRead).length} خوانده نشده
-                            </span>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {notifications.filter(n => !n.isRead).length > 0 && (
+                <div className="flex flex-col border-b border-slate-200 bg-gradient-to-r from-teal-600 to-teal-700">
+                    <div className="flex items-center justify-between p-4">
+                        <div className="flex items-center gap-3">
+                            <HiBell className="w-6 h-6 text-white" />
+                            <h2 className="text-white font-bold text-lg">اعلان‌ها</h2>
+                            {notifications.filter(n => !n.isRead).length > 0 && (
+                                <span className="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    {notifications.filter(n => !n.isRead).length} خوانده نشده
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {notifications.filter(n => !n.isRead).length > 0 && (
+                                <button
+                                    onClick={handleMarkAllAsRead}
+                                    className="text-white/90 hover:text-white text-sm px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                                >
+                                    همه را خوانده شده
+                                </button>
+                            )}
                             <button
-                                onClick={handleMarkAllAsRead}
-                                className="text-white/90 hover:text-white text-sm px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                                onClick={onClose}
+                                className="p-2 rounded-lg hover:bg-white/10 text-white transition-colors"
                             >
-                                همه را خوانده شده
+                                <HiX className="w-5 h-5" />
                             </button>
-                        )}
-                        <button
-                            onClick={onClose}
-                            className="p-2 rounded-lg hover:bg-white/10 text-white transition-colors"
-                        >
-                            <HiX className="w-5 h-5" />
-                        </button>
+                        </div>
+                    </div>
+                    {/* Search Bar */}
+                    <div className="px-4 pb-4">
+                        <div className="relative">
+                            <HiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                            <input
+                                type="text"
+                                placeholder="جستجو در اعلان‌ها..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg pr-10 pl-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -227,15 +266,19 @@ export default function NotificationDrawer({ isOpen, onClose, onCountUpdate, anc
                                 </div>
                             ))}
                         </div>
-                    ) : notifications.length === 0 ? (
+                    ) : filteredNotifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                             <HiBell className="w-16 h-16 text-slate-300 mb-4" />
-                            <p className="text-slate-500 text-lg font-medium">اعلانی وجود ندارد</p>
-                            <p className="text-slate-400 text-sm mt-2">وقتی اعلان جدیدی داشته باشید، اینجا نمایش داده می‌شود</p>
+                            <p className="text-slate-500 text-lg font-medium">
+                                {searchQuery ? "نتیجه‌ای یافت نشد" : "اعلانی وجود ندارد"}
+                            </p>
+                            <p className="text-slate-400 text-sm mt-2">
+                                {searchQuery ? "لطفاً عبارت جستجوی دیگری امتحان کنید" : "وقتی اعلان جدیدی داشته باشید، اینجا نمایش داده می‌شود"}
+                            </p>
                         </div>
                     ) : (
                         <div className="divide-y divide-slate-100">
-                            {notifications.map((notification) => {
+                            {filteredNotifications.map((notification) => {
                                 const isUnread = !notification.isRead;
                                 const title = notification.title?.fa || notification.title || "اعلان";
                                 const message = notification.message?.fa || notification.message || "";

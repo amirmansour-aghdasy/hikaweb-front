@@ -9,7 +9,14 @@ const ThemeContext = createContext({
 });
 
 export function ThemeProvider({ children }) {
-    const [theme, setTheme] = useState("system");
+    // Initialize theme immediately from localStorage (no waiting for mount)
+    // This prevents FOUC by reading theme before first render
+    const [theme, setTheme] = useState(() => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("theme") || "system";
+        }
+        return "system";
+    });
     const [mounted, setMounted] = useState(false);
 
     // Get resolved theme (light or dark)
@@ -20,9 +27,17 @@ export function ThemeProvider({ children }) {
     useEffect(() => {
         setMounted(true);
         
-        // Load theme from localStorage
-        const savedTheme = localStorage.getItem("theme") || "system";
-        setTheme(savedTheme);
+        // Apply theme immediately on mount (localStorage already read in useState)
+        // The inline script in layout.js already applied the theme, but we sync here
+        const root = document.documentElement;
+        if (theme === "system") {
+            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+            root.classList.remove("light", "dark");
+            root.classList.add(systemTheme);
+        } else {
+            root.classList.remove("light", "dark");
+            root.classList.add(theme);
+        }
     }, []);
 
     useEffect(() => {

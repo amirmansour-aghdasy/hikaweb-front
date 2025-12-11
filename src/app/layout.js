@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Footer, Header, Breadcrumb } from "@/components/common";
 import { ActionButtonsContainer, ModalsContainer, ScriptsContainer } from "@/containers";
 import { generateOrganizationSchema, generateWebsiteSchema, defaultMetadata } from "@/lib/seo";
+import ErrorBoundary from "@/components/error/ErrorBoundary";
 
 export const metadata = {
     title: {
@@ -89,8 +90,23 @@ export default function RootLayout({ children }) {
     const websiteSchema = generateWebsiteSchema();
 
     return (
-        <html lang="fa" dir="rtl">
+        <html lang="fa" dir="rtl" suppressHydrationWarning>
             <head>
+                {/* Theme detection script - must run before body to prevent FOUC */}
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            (function() {
+                                try {
+                                    var theme = localStorage.getItem('theme') || 'system';
+                                    var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                                    var resolvedTheme = theme === 'system' ? systemTheme : theme;
+                                    document.documentElement.classList.add(resolvedTheme);
+                                } catch (e) {}
+                            })();
+                        `
+                    }}
+                />
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -104,13 +120,15 @@ export default function RootLayout({ children }) {
                 <span className="absolute w-full top-0 right-0 h-1 bg-teal-500 dark:bg-teal-600"></span>
                 <StoreProvider>
                     <ThemeProvider>
-                        <ScriptsContainer />
-                        <ModalsContainer />
-                        <ActionButtonsContainer />
-                        <Header />
-                        <Breadcrumb />
-                        {children}
-                        <Footer />
+                        <ErrorBoundary>
+                            <ScriptsContainer />
+                            <ModalsContainer />
+                            <ActionButtonsContainer />
+                            <Header />
+                            <Breadcrumb />
+                            {children}
+                            <Footer />
+                        </ErrorBoundary>
                     </ThemeProvider>
                 </StoreProvider>
             </body>
