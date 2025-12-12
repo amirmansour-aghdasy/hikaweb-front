@@ -7,7 +7,7 @@ const ScriptsContainer = () => {
     return (
         <>
             <GlobalErrorHandler />
-            <Goftino />
+            {/* <Goftino /> */}
             <ClarityTracker />
         </>
     );

@@ -426,7 +426,7 @@ export default function WhatsAppChatWidget({
     };
 
     const positionClasses = {
-        "bottom-right": "bottom-4 md:bottom-24 right-[15px] md:right-[30px]",
+        "bottom-right": "bottom-[15px] md:bottom-[30px] right-[15px] md:right-[30px]",
         "bottom-left": "bottom-4 md:bottom-16 left-4 md:left-6"
     };
 

@@ -29,13 +29,14 @@ const ALLOWED_ENDPOINTS = [
   /^\/articles(\?.*)?$/,
   /^\/articles\/featured(\?.*)?$/,
   /^\/articles\/popular(\?.*)?$/,
-  /^\/articles\/slug\/[a-zA-Z0-9\-_]+(\?.*)?$/,
+  // Allow Persian characters, English letters, numbers, dashes, and underscores in slug
+  /^\/articles\/slug\/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-zA-Z0-9\-_%]+(\?.*)?$/,
   // Services
   /^\/services(\?.*)?$/,
-  /^\/services\/slug\/[a-zA-Z0-9\-_]+(\?.*)?$/,
+  /^\/services\/slug\/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-zA-Z0-9\-_%]+(\?.*)?$/,
   // Portfolio
   /^\/portfolio(\?.*)?$/,
-  /^\/portfolio\/slug\/[a-zA-Z0-9\-_]+(\?.*)?$/,
+  /^\/portfolio\/slug\/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-zA-Z0-9\-_%]+(\?.*)?$/,
   // Brands
   /^\/brands(\?.*)?$/,
   /^\/brands\/featured(\?.*)?$/,
@@ -59,13 +60,25 @@ const ALLOWED_ENDPOINTS = [
  */
 function validateEndpoint(endpoint) {
   // Remove leading slash for pattern matching
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  let cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   
-  // Remove query string for pattern matching
-  const endpointPath = cleanEndpoint.split('?')[0];
+  // Try to decode URL-encoded characters (for Persian slugs)
+  // But keep the original for pattern matching to support both encoded and decoded
+  let decodedEndpoint = cleanEndpoint;
+  try {
+    // Decode the path part (before query string)
+    const [path, query] = cleanEndpoint.split('?');
+    const decodedPath = decodeURIComponent(path);
+    decodedEndpoint = query ? `${decodedPath}?${query}` : decodedPath;
+  } catch (e) {
+    // If decoding fails, use original endpoint
+    decodedEndpoint = cleanEndpoint;
+  }
   
-  // Check if endpoint matches any allowed pattern
-  const isAllowed = ALLOWED_ENDPOINTS.some(pattern => pattern.test(cleanEndpoint));
+  // Check if endpoint matches any allowed pattern (try both encoded and decoded)
+  const isAllowed = ALLOWED_ENDPOINTS.some(pattern => 
+    pattern.test(cleanEndpoint) || pattern.test(decodedEndpoint)
+  );
   
   if (!isAllowed) {
     // Log security violation attempt
@@ -99,7 +112,21 @@ export async function serverFetch(endpoint, options = {}) {
   validateEndpoint(endpoint);
   
   const safeEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const url = `${API_BASE_URL}${safeEndpoint}`;
+  
+  // Decode URL-encoded characters (for Persian slugs) before sending to API
+  // The endpoint comes URL-encoded from Next.js routing, but API expects decoded
+  let decodedEndpoint = safeEndpoint;
+  try {
+    // Decode the path part (before query string)
+    const [path, query] = safeEndpoint.split('?');
+    const decodedPath = decodeURIComponent(path);
+    decodedEndpoint = query ? `${decodedPath}?${query}` : decodedPath;
+  } catch (e) {
+    // If decoding fails, use original endpoint
+    decodedEndpoint = safeEndpoint;
+  }
+  
+  const url = `${API_BASE_URL}${decodedEndpoint}`;
   
   // Default cache strategy: revalidate every 300 seconds (5 minutes) for better performance
   // Static/semi-static data can use longer cache times

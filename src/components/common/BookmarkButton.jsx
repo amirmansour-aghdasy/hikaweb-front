@@ -135,10 +135,10 @@ export default function BookmarkButton({
         <button
             onClick={handleBookmark}
             disabled={isLoading || isChecking}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
+            className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md ${
                 isBookmarked
-                    ? 'bg-teal-600 text-white hover:bg-teal-700'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                    ? 'bg-teal-600 text-white hover:bg-teal-700 dark:bg-teal-600 dark:hover:bg-teal-700'
+                    : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300'
             } ${isLoading || isChecking ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
         >
             {isBookmarked ? (

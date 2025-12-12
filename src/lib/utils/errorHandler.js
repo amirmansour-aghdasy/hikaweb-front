@@ -144,8 +144,18 @@ export function setupGlobalErrorHandlers() {
             console.error('Global Error:', event.error);
         }
         
-        // Show user-friendly error message
-        toast.error('خطایی در صفحه رخ داد. لطفاً صفحه را رفرش کنید.');
+        // Only show error toast for actual errors, not for handled errors
+        // Check if error is from a known source that already handles errors
+        const errorSource = event.filename || '';
+        const isKnownErrorSource = errorSource.includes('chunk') || 
+                                   errorSource.includes('webpack') ||
+                                   errorSource.includes('_next');
+        
+        // Don't show toast for chunk loading errors or other handled errors
+        if (!isKnownErrorSource && event.error) {
+            // Show user-friendly error message only for unexpected errors
+            toast.error('خطایی در صفحه رخ داد. لطفاً صفحه را رفرش کنید.');
+        }
         
         // Return true to prevent default error handling
         return true;

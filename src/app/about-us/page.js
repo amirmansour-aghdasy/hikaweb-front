@@ -1,8 +1,8 @@
 import Image from "next/image";
 
-import { teamMembers } from "@/lib/constants";
 import TeamMemberCard from "@/components/cards/TeamMemberCard";
 import { defaultMetadata } from "@/lib/seo";
+import { serverGet } from "@/lib/api/server";
 
 export const metadata = {
     title: "درباره ما | هیکاوب",
@@ -19,7 +19,23 @@ export const metadata = {
     },
 };
 
-const AboutUsPage = () => {
+const AboutUsPage = async () => {
+    // Fetch team members from API
+    let teamMembers = [];
+    try {
+        const teamRes = await serverGet('/team/public?limit=50', { revalidate: 300 });
+        // Backend returns: { success: true, data: { teamMembers: [...] } }
+        if (teamRes?.success && teamRes?.data?.teamMembers) {
+            teamMembers = teamRes.data.teamMembers;
+        } else if (teamRes?.teamMembers) {
+            // Fallback for different response structure
+            teamMembers = teamRes.teamMembers;
+        }
+    } catch (error) {
+        console.error("Error fetching team members:", error);
+        // Fallback to empty array if API fails
+        teamMembers = [];
+    }
     return (
         <main className="w-full py-7 md:py-14 flex flex-col gap-7 md:gap-14 overflow-hidden md:overflow-visible">
             <Image
@@ -65,9 +81,29 @@ const AboutUsPage = () => {
                     <span className="w-full h-0.5 bg-teal-700 dark:bg-teal-600" data-aos="fade-right"></span>
                 </div>
                 <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 mt-5">
-                    {teamMembers.map((member, index) => (
-                        <TeamMemberCard member={member} data-aos="fade-up" data-aos-delay={index * 250} key={index} />
-                    ))}
+                    {teamMembers.length > 0 ? (
+                        teamMembers.map((member, index) => (
+                            <TeamMemberCard 
+                                member={{
+                                    thumbnailUrl: member.avatar || "/assets/images/team-member.png",
+                                    name: member.name?.fa || member.name || "",
+                                    position: member.position?.fa || member.position || "",
+                                    socialLinks: member.socialLinks || {
+                                        instagram: "",
+                                        telegram: "",
+                                        whatsapp: "",
+                                    },
+                                }} 
+                                data-aos="fade-up" 
+                                data-aos-delay={index * 250} 
+                                key={member._id || index} 
+                            />
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-8 text-slate-500 dark:text-slate-400">
+                            <p>در حال حاضر اطلاعات تیم در دسترس نیست.</p>
+                        </div>
+                    )}
                 </div>
             </section>
         </main>

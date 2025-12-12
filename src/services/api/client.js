@@ -1,7 +1,14 @@
 // Get API URL from environment or use default
 const getApiBaseUrl = () => {
-  // In development, always use localhost (ignore NEXT_PUBLIC_API_URL)
-  if (process.env.NODE_ENV === 'development') {
+  // Check if we're in browser and on localhost (development)
+  const isLocalhost = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || 
+     window.location.hostname === '127.0.0.1' ||
+     window.location.hostname.startsWith('192.168.') ||
+     window.location.hostname.startsWith('10.'));
+  
+  // In development (localhost), always use localhost backend
+  if (process.env.NODE_ENV === 'development' || isLocalhost) {
     return 'http://localhost:5000/api/v1';
   }
   
@@ -72,9 +79,14 @@ class ApiClient {
                                endpoint.includes('/consultations') || endpoint.includes('/bookmarks') ||
                                endpoint.includes('/notifications');
     
+    // Check if this is a public endpoint that doesn't need auth (view tracking, ratings, etc.)
+    const isPublicEndpoint = endpoint.includes('/view') || endpoint.includes('/rate') || 
+                            endpoint.includes('/public') || endpoint.includes('/slug/');
+    
     // Add auth token if available (for client-side requests)
+    // But skip for public endpoints that explicitly don't need auth
     let hasToken = false;
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isPublicEndpoint) {
       const cookies = document.cookie.split(';');
       const accessToken = cookies
         .find(c => c.trim().startsWith('accessToken='))

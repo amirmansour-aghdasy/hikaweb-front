@@ -103,6 +103,7 @@ export default function TicketsTab({ user, onStatsChange, searchQuery = "" }) {
     const fetchTickets = async () => {
         try {
             setLoading(true);
+            // Don't pass 'all=true' or 'customer' filter - backend will filter by user ID for frontend requests
             const response = await apiClient.get("/tickets?limit=50");
             setTickets(response.data?.data || response.data || []);
         } catch (error) {

@@ -80,6 +80,15 @@ const RatingWidget = dynamic(() => import("@/components/articles/RatingWidget"),
     ssr: true,
 });
 
+// Helper function to format file size
+const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+};
+
 export default function ArticleDetailClient({ 
     article: initialArticle, 
     relatedArticles = [], 
@@ -88,7 +97,10 @@ export default function ArticleDetailClient({
 }) {
     const router = useRouter();
     const { isAuthenticated, user } = useAuthStore();
-    const [article, setArticle] = useState(initialArticle);
+    const [article, setArticle] = useState({
+        ...initialArticle,
+        isLiked: false // Will be updated from API response
+    });
     const [userRating, setUserRating] = useState(null);
     const contentRef = useRef(null);
     const [isSticky, setIsSticky] = useState(false);
@@ -107,7 +119,7 @@ export default function ArticleDetailClient({
         fetchUserRating();
     }, [article._id]);
 
-    // Track unique view
+    // Track unique view (without authentication)
     useEffect(() => {
         const trackView = async () => {
             if (typeof window === 'undefined') return;
@@ -115,28 +127,44 @@ export default function ArticleDetailClient({
             const articleId = article._id;
             const storageKey = `article_view_${articleId}`;
             
-            // Check if view already tracked in this session/browser
-            const hasViewed = localStorage.getItem(storageKey);
+            // Check if view already tracked in this session/browser (24 hours)
+            const lastViewTime = localStorage.getItem(storageKey);
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
             
-            if (!hasViewed) {
+            // Only track if not viewed in last 24 hours
+            if (!lastViewTime || (now - parseInt(lastViewTime)) > oneDay) {
                 try {
+                    // Use apiClient for public endpoint (handles CORS properly)
+                    // apiClient automatically detects public endpoints and doesn't require token
                     const response = await apiClient.post(`/articles/${articleId}/view`);
                     
-                    if (response.data?.success) {
-                        // Mark as viewed in localStorage (expires after 24 hours)
-                        localStorage.setItem(storageKey, Date.now().toString());
+                    if (response?.success) {
+                        // Mark as viewed in localStorage (with timestamp)
+                        localStorage.setItem(storageKey, now.toString());
                         
                         // Update article views count
-                        if (response.data?.data?.views !== undefined) {
+                        if (response.data?.views !== undefined) {
                             setArticle(prev => ({
                                 ...prev,
-                                views: response.data.data.views
+                                views: response.data.views
                             }));
                         }
                     }
                 } catch (error) {
                     // Silently fail - don't interrupt user experience
-                    console.error('Error tracking view:', error);
+                    // Don't log CORS or network errors as they're expected in some cases
+                    // CORS errors happen when frontend and backend are on different origins
+                    // This is expected in development when using production API
+                    if (error.status !== 401 && 
+                        error.status !== 0 && 
+                        !error.message?.includes('Failed to fetch') &&
+                        !error.message?.includes('CORS')) {
+                        // Only log unexpected errors
+                        if (process.env.NODE_ENV === 'development') {
+                            console.warn('View tracking failed (non-critical):', error.message);
+                        }
+                    }
                 }
             }
         };
@@ -179,9 +207,11 @@ export default function ArticleDetailClient({
     const author = article.author?.name || "تیم هیکاوب";
     const authorAvatar = article.author?.avatar || "";
     const views = article.views || 0;
-    const likes = article.likes || 0;
+    const [likes, setLikes] = useState(article.likes || 0);
+    const [isLiked, setIsLiked] = useState(article.isLiked || false);
     const averageRating = article.ratings?.average || 0;
     const totalRatings = article.ratings?.count || 0;
+
 
     // Format date
     const date = new Date(publishedAt);
@@ -321,16 +351,18 @@ export default function ArticleDetailClient({
                                 </div>
                             )}
 
-                            {/* Social Share & Actions - Enhanced */}
-                            <div className="flex items-center justify-between p-3.5 rounded-xl shadow mb-8 bg-white dark:bg-slate-800" data-aos="fade-up">
-                                <RatingWidget
-                                    articleId={article._id}
-                                    averageRating={averageRating}
-                                    totalRatings={totalRatings}
-                                    userRating={userRating}
-                                    onRate={handleRating}
-                                />
-                                <div className="flex items-center gap-3">
+                            {/* Social Share & Actions - Enhanced & Responsive */}
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-3.5 rounded-xl shadow mb-8 bg-white dark:bg-slate-800" data-aos="fade-up">
+                                <div className="flex-shrink-0">
+                                    <RatingWidget
+                                        articleId={article._id}
+                                        averageRating={averageRating}
+                                        totalRatings={totalRatings}
+                                        userRating={userRating}
+                                        onRate={handleRating}
+                                    />
+                                </div>
+                                <div className="flex items-center justify-center sm:justify-end gap-2 sm:gap-3 flex-wrap">
                                     <ShareButton 
                                         title={title}
                                         excerpt={article.excerpt?.fa || article.shortDescription?.fa || ""}
@@ -349,19 +381,35 @@ export default function ArticleDetailClient({
                                             
                                             try {
                                                 const response = await apiClient.post(`/articles/${article._id}/like`);
+                                                const newLikes = response.data?.data?.likes || likes;
+                                                const newIsLiked = response.data?.data?.isLiked !== false; // Default to true if not specified
+                                                
+                                                setLikes(newLikes);
+                                                setIsLiked(newIsLiked);
+                                                
+                                                // Also update article state
                                                 setArticle(prev => ({ 
                                                     ...prev, 
-                                                    likes: response.data?.data?.likes || (prev.likes || 0) + 1 
+                                                    likes: newLikes
                                                 }));
-                                                toast.success("مقاله مورد علاقه شما قرار گرفت");
+                                                
+                                                if (newIsLiked) {
+                                                    toast.success("مقاله مورد علاقه شما قرار گرفت");
+                                                } else {
+                                                    toast.success("لایک شما برداشته شد");
+                                                }
                                             } catch (error) {
-                                                toast.error("خطا در لایک کردن مقاله");
+                                                toast.error(error.response?.data?.message || "خطا در لایک کردن مقاله");
                                             }
                                         }}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-50 to-pink-50 hover:from-red-100 hover:to-pink-100 text-red-600 transition-all duration-300 shadow-sm hover:shadow-md"
+                                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md ${
+                                            isLiked 
+                                                ? "bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/30 dark:to-pink-900/30 hover:from-red-200 hover:to-pink-200 dark:hover:from-red-900/40 dark:hover:to-pink-900/40 text-red-700 dark:text-red-300" 
+                                                : "bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 hover:from-red-100 hover:to-pink-100 dark:hover:from-red-900/30 dark:hover:to-pink-900/30 text-red-600 dark:text-red-400"
+                                        }`}
                                     >
-                                        <BsHeart className="w-5 h-5" />
-                                        <span className="font-semibold">{likes.toLocaleString('fa-IR')}</span>
+                                        <BsHeart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+                                        <span className="font-semibold text-sm sm:text-base">{likes.toLocaleString('fa-IR')}</span>
                                     </button>
                                 </div>
                             </div>
@@ -382,28 +430,119 @@ export default function ArticleDetailClient({
                             </div>
                         )}
 
-                        {/* Article Content - Premium Typography */}
+                        {/* Article Content - Premium Typography with Dark Mode Support */}
                         <div
                             ref={contentRef}
-                            className="prose prose-lg prose-slate max-w-none 
-                                prose-headings:text-slate-900 prose-headings:font-extrabold prose-headings:mb-6 prose-headings:mt-12
-                                prose-h1:text-5xl prose-h1:mb-8 prose-h1:mt-16 prose-h1:leading-tight
-                                prose-h2:text-4xl prose-h2:mb-6 prose-h2:mt-14 prose-h2:leading-tight
-                                prose-h3:text-3xl prose-h3:mb-5 prose-h3:mt-12 prose-h3:leading-tight
-                                prose-h4:text-2xl prose-h4:mb-4 prose-h4:mt-10
-                                prose-p:text-slate-700 prose-p:leading-relaxed prose-p:text-lg md:prose-p:text-xl prose-p:mb-8
-                                prose-a:text-teal-600 prose-a:no-underline hover:prose-a:underline prose-a:font-semibold prose-a:transition-all
-                                prose-strong:text-slate-900 prose-strong:font-extrabold
-                                prose-ul:text-slate-700 prose-ol:text-slate-700 prose-ul:mb-8 prose-ol:mb-8 prose-ul:text-lg prose-ol:text-lg
-                                prose-li:mb-3 prose-li:leading-relaxed prose-li:pl-2
-                                prose-img:rounded-3xl prose-img:shadow-2xl prose-img:my-12 prose-img:w-full prose-img:border-4 prose-img:border-slate-100
-                                prose-blockquote:border-r-4 prose-blockquote:border-teal-500 prose-blockquote:bg-gradient-to-r prose-blockquote:from-teal-50 prose-blockquote:to-cyan-50 prose-blockquote:py-6 prose-blockquote:px-8 prose-blockquote:rounded-r-2xl prose-blockquote:my-10 prose-blockquote:text-slate-800 prose-blockquote:text-lg prose-blockquote:font-medium prose-blockquote:shadow-lg
-                                prose-code:bg-slate-900 prose-code:text-teal-300 prose-code:px-3 prose-code:py-1.5 prose-code:rounded-lg prose-code:text-sm prose-code:font-mono prose-code:shadow-inner
-                                prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:rounded-3xl prose-pre:shadow-2xl prose-pre:my-10 prose-pre:border prose-pre:border-slate-700
-                                prose-hr:border-slate-300 prose-hr:my-12 prose-hr:border-t-2"
+                            className="prose prose-base md:prose-lg max-w-none 
+                                /* Headings - Light & Dark Mode */
+                                prose-headings:text-slate-900 dark:prose-headings:text-slate-100 
+                                prose-headings:font-extrabold prose-headings:mb-5 prose-headings:mt-10
+                                /* H1 - Responsive & Smaller */
+                                prose-h1:text-3xl sm:prose-h1:text-4xl md:prose-h1:text-4xl lg:prose-h1:text-5xl 
+                                prose-h1:mb-6 prose-h1:mt-12 prose-h1:leading-tight
+                                dark:prose-h1:text-slate-50
+                                /* H2 - Responsive & Smaller */
+                                prose-h2:text-2xl sm:prose-h2:text-3xl md:prose-h2:text-3xl lg:prose-h2:text-4xl 
+                                prose-h2:mb-5 prose-h2:mt-10 prose-h2:leading-tight
+                                dark:prose-h2:text-slate-100
+                                /* H3 - Responsive & Smaller */
+                                prose-h3:text-xl sm:prose-h3:text-2xl md:prose-h3:text-2xl lg:prose-h3:text-3xl 
+                                prose-h3:mb-4 prose-h3:mt-8 prose-h3:leading-tight
+                                dark:prose-h3:text-slate-200
+                                /* H4 - Responsive & Smaller */
+                                prose-h4:text-lg sm:prose-h4:text-xl md:prose-h4:text-xl lg:prose-h4:text-2xl 
+                                prose-h4:mb-3 prose-h4:mt-8
+                                dark:prose-h4:text-slate-200
+                                /* Paragraphs - Responsive, Smaller & Dark Mode */
+                                prose-p:text-slate-700 dark:prose-p:text-slate-200 
+                                prose-p:leading-relaxed 
+                                prose-p:text-base sm:prose-p:text-base md:prose-p:text-lg lg:prose-p:text-lg 
+                                prose-p:mb-6
+                                /* Links - Enhanced for Dark Mode */
+                                prose-a:text-teal-600 dark:prose-a:text-teal-400 
+                                prose-a:no-underline hover:prose-a:underline 
+                                prose-a:font-semibold prose-a:transition-all
+                                /* Strong - Dark Mode Support */
+                                prose-strong:text-slate-900 dark:prose-strong:text-slate-100 
+                                prose-strong:font-extrabold
+                                /* Lists - Responsive & Dark Mode */
+                                prose-ul:text-slate-700 dark:prose-ul:text-slate-200 
+                                prose-ol:text-slate-700 dark:prose-ol:text-slate-200 
+                                prose-ul:mb-6 prose-ol:mb-6 
+                                prose-ul:text-base sm:prose-ul:text-base md:prose-ul:text-lg 
+                                prose-ol:text-base sm:prose-ol:text-base md:prose-ol:text-lg
+                                prose-li:mb-2 prose-li:leading-relaxed prose-li:pl-2
+                                /* Images - Dark Mode Border */
+                                prose-img:rounded-3xl prose-img:shadow-2xl prose-img:my-10 prose-img:w-full 
+                                prose-img:border-4 prose-img:border-slate-100 dark:prose-img:border-slate-700
+                                /* Blockquotes - Dark Mode Support */
+                                prose-blockquote:border-r-4 prose-blockquote:border-teal-500 
+                                dark:prose-blockquote:border-teal-400
+                                prose-blockquote:bg-gradient-to-r prose-blockquote:from-teal-50 prose-blockquote:to-cyan-50 
+                                dark:prose-blockquote:from-teal-900/20 dark:prose-blockquote:to-cyan-900/20
+                                prose-blockquote:py-5 prose-blockquote:px-6 prose-blockquote:rounded-r-2xl 
+                                prose-blockquote:my-8 
+                                prose-blockquote:text-slate-800 dark:prose-blockquote:text-slate-200 
+                                prose-blockquote:text-base md:prose-blockquote:text-lg 
+                                prose-blockquote:font-medium prose-blockquote:shadow-lg
+                                /* Code - Dark Mode Support */
+                                prose-code:bg-slate-900 dark:prose-code:bg-slate-800 
+                                prose-code:text-teal-300 dark:prose-code:text-teal-400 
+                                prose-code:px-3 prose-code:py-1.5 prose-code:rounded-lg 
+                                prose-code:text-sm prose-code:font-mono prose-code:shadow-inner
+                                /* Pre - Dark Mode Support */
+                                prose-pre:bg-slate-900 dark:prose-pre:bg-slate-800 
+                                prose-pre:text-slate-100 dark:prose-pre:text-slate-200 
+                                prose-pre:rounded-3xl prose-pre:shadow-2xl prose-pre:my-8 
+                                prose-pre:border prose-pre:border-slate-700 dark:prose-pre:border-slate-600
+                                /* HR - Dark Mode Support */
+                                prose-hr:border-slate-300 dark:prose-hr:border-slate-600 
+                                prose-hr:my-10 prose-hr:border-t-2"
                             dangerouslySetInnerHTML={{ __html: sanitizeHTML(content) }}
                             data-aos="fade-up"
                         />
+
+                        {/* Download Box */}
+                        {article.downloadBox && article.downloadBox.isActive && article.downloadBox.fileUrl && (
+                            <div className="mt-14" data-aos="fade-up">
+                                <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-3xl p-8 shadow-xl border-2 border-teal-200 dark:border-teal-800">
+                                    <div className="flex items-start gap-4">
+                                        <div className="p-3 bg-teal-500 rounded-2xl shadow-lg flex-shrink-0">
+                                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            {article.downloadBox.title?.fa && (
+                                                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
+                                                    {article.downloadBox.title.fa}
+                                                </h3>
+                                            )}
+                                            {article.downloadBox.description?.fa && (
+                                                <p className="text-slate-700 dark:text-slate-300 mb-4 leading-relaxed">
+                                                    {article.downloadBox.description.fa}
+                                                </p>
+                                            )}
+                                            <a
+                                                href={article.downloadBox.fileUrl}
+                                                download={article.downloadBox.fileName || true}
+                                                className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                                <span>دانلود فایل</span>
+                                                {article.downloadBox.fileSize && (
+                                                    <span className="text-sm opacity-90">
+                                                        ({formatFileSize(article.downloadBox.fileSize)})
+                                                    </span>
+                                                )}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Article Gallery if available */}
                         {article.gallery && article.gallery.length > 0 && (
