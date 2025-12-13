@@ -221,37 +221,61 @@ export default function ArticleDetailClient({
         day: "numeric",
     }).format(date);
 
-    // Extract headings for table of contents
+    // Extract headings for table of contents and add IDs to HTML
     const [headings, setHeadings] = useState([]);
+    const [processedContent, setProcessedContent] = useState(content);
 
     useEffect(() => {
-        if (typeof window === 'undefined' || !contentRef.current) return;
+        if (typeof window === 'undefined' || !content) return;
 
-        const extractHeadings = () => {
+        const processContent = () => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(content, 'text/html');
             const headingsElements = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
-            return Array.from(headingsElements).map((heading, index) => {
+            
+            const extractedHeadings = Array.from(headingsElements).map((heading, index) => {
                 const id = `heading-${index}`;
-                if (contentRef.current) {
-                    const actualHeading = contentRef.current.querySelector(`h${heading.tagName.charAt(1)}:nth-of-type(${index + 1})`);
-                    if (actualHeading) {
-                        actualHeading.id = id;
-                    }
-                }
+                // Add ID to the heading element in the parsed document
+                heading.setAttribute('id', id);
                 return {
                     id,
-                    text: heading.textContent,
+                    text: heading.textContent?.trim() || '',
                     level: parseInt(heading.tagName.charAt(1))
                 };
             });
+
+            // Get the body element's innerHTML (which contains all the content)
+            const bodyElement = doc.body || doc.documentElement;
+            const processedContentHTML = bodyElement.innerHTML;
+
+            setProcessedContent(processedContentHTML);
+            setHeadings(extractedHeadings);
         };
 
-        setTimeout(() => {
-            const extractedHeadings = extractHeadings();
-            setHeadings(extractedHeadings);
-        }, 100);
+        processContent();
     }, [content]);
+
+    // Ensure IDs are set in DOM after render (fallback for edge cases)
+    useEffect(() => {
+        if (typeof window === 'undefined' || !contentRef.current || headings.length === 0) return;
+
+        const setHeadingIds = () => {
+            headings.forEach((heading, index) => {
+                const element = contentRef.current?.querySelector(`#${heading.id}`);
+                if (!element) {
+                    // Try to find heading by index if ID not found
+                    const allHeadings = contentRef.current?.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                    if (allHeadings && index < allHeadings.length) {
+                        allHeadings[index].id = heading.id;
+                    }
+                }
+            });
+        };
+
+        // Wait for content to be fully rendered
+        const timer = setTimeout(setHeadingIds, 300);
+        return () => clearTimeout(timer);
+    }, [headings, processedContent]);
 
     return (
         <main className="w-full min-h-screen">
@@ -498,35 +522,37 @@ export default function ArticleDetailClient({
                                 /* HR - Dark Mode Support */
                                 prose-hr:border-slate-300 dark:prose-hr:border-slate-600 
                                 prose-hr:my-10 prose-hr:border-t-2"
-                            dangerouslySetInnerHTML={{ __html: sanitizeHTML(content) }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeHTML(processedContent || content) }}
                             data-aos="fade-up"
                         />
 
                         {/* Download Box */}
                         {article.downloadBox && article.downloadBox.isActive && article.downloadBox.fileUrl && (
                             <div className="mt-14" data-aos="fade-up">
-                                <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-3xl p-8 shadow-xl border-2 border-teal-200 dark:border-teal-800">
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-3 bg-teal-500 rounded-2xl shadow-lg flex-shrink-0">
+                                <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-3xl p-3.5 md:p-4 lg:p-8 shadow-xl border-2 border-teal-200 dark:border-teal-800">
+                                    <div className="flex items-center gap-3 md:gap-5">
+                                        <div className="p-2 md:p-3 bg-teal-500 rounded-2xl shadow-lg flex-shrink-0">
                                             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
                                         </div>
-                                        <div className="flex-1">
-                                            {article.downloadBox.title?.fa && (
-                                                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
+                                        <div className="flex-1 flex flex-col md:flex-row justify-between items-center">
+                                           <div className="flex-1">
+                                           {article.downloadBox.title?.fa && (
+                                                <h3 className="text-lg md:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
                                                     {article.downloadBox.title.fa}
                                                 </h3>
                                             )}
                                             {article.downloadBox.description?.fa && (
-                                                <p className="text-slate-700 dark:text-slate-300 mb-4 leading-relaxed">
+                                                <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 mb-4 leading-relaxed">
                                                     {article.downloadBox.description.fa}
                                                 </p>
                                             )}
+                                           </div>
                                             <a
                                                 href={article.downloadBox.fileUrl}
                                                 download={article.downloadBox.fileName || true}
-                                                className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                                className="inline-flex items-center gap-3 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
