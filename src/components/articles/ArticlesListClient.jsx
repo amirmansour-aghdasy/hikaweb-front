@@ -354,7 +354,7 @@ export default function ArticlesListClient({
                                         {displayArticles.map((article, index) => (
                                             <div 
                                                 key={article.id || index} 
-                                                className="h-full flex" 
+                                                className="h-full flex shadow-lg hover:shadow-xl transition-all duration-500" 
                                                 data-aos="fade-up" 
                                                 data-aos-delay={index * 50}
                                             >

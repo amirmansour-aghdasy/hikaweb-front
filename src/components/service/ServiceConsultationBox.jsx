@@ -153,7 +153,7 @@ export default function ServiceConsultationBox({ serviceName, serviceSlug, servi
                                     name="phone"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 11) })}
-                                    className="w-full rounded-lg outline-none bg-slate-50 dark:bg-slate-700 p-3 text-sm border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-teal-500 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-400/20"
+                                    className="w-full rounded-lg outline-none bg-slate-50 dark:bg-slate-700 p-3 text-sm border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-right placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-teal-500 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-400/20"
                                     placeholder="شماره موبایل"
                                     required
                                 />

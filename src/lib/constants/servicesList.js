@@ -22,12 +22,12 @@ export const services_list = [
     {
         title: "مدیریت شبکه های اجتماعی",
         giffSrc: "/assets/giff/social-media.gif",
-        url: "/service/social-marketing",
+        url: "/service/social-media-management",
     },
     {
         title: "تولید محتوا و تدوین",
         giffSrc: "/assets/giff/trending.gif",
-        url: "/service/content-and-editing",
+        url: "/service/content-production-and-editing",
     },
     {
         title: "طراحی لوگو و برند سازی",

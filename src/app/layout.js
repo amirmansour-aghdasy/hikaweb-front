@@ -12,6 +12,7 @@ import { Footer, Header, Breadcrumb } from "@/components/common";
 import { ActionButtonsContainer, ModalsContainer, ScriptsContainer } from "@/containers";
 import { generateOrganizationSchema, generateWebsiteSchema, defaultMetadata } from "@/lib/seo";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
+import { safeServerGet } from "@/lib/utils/safeServerGet";
 
 export const metadata = {
     title: {
@@ -84,14 +85,35 @@ export const viewport = {
     themeColor: "#0d9488",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
     // Generate structured data for organization and website
     const organizationSchema = generateOrganizationSchema();
     const websiteSchema = generateWebsiteSchema();
 
+    // Fetch Google verification code from settings API (with fallback to env variable)
+    let googleVerificationCode = process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || '';
+    
+    try {
+        // Try to fetch from Settings API (cache for 1 hour)
+        const settingsRes = await safeServerGet('/settings/public', { revalidate: 3600 });
+        if (settingsRes?.data?.settings?.seo?.googleSiteVerification) {
+            googleVerificationCode = settingsRes.data.settings.seo.googleSiteVerification;
+        }
+    } catch (error) {
+        // Silently fallback to environment variable if API fails
+        // This ensures the site still works even if Settings API is unavailable
+    }
+
     return (
         <html lang="fa" dir="rtl" suppressHydrationWarning>
             <head>
+                {/* Google Search Console Verification */}
+                {googleVerificationCode && (
+                    <meta 
+                        name="google-site-verification" 
+                        content={googleVerificationCode} 
+                    />
+                )}
                 {/* Theme detection script - must run before body to prevent FOUC */}
                 <script
                     dangerouslySetInnerHTML={{

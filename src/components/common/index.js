@@ -4,3 +4,4 @@ export { default as Header } from "./Header";
 export { default as Footer } from "./Footer";
 export { default as GalleryLightbox } from "./GalleryLightbox";
 export { default as PortfolioSlider } from "./PortfolioSlider";
+export { default as ShortLinkBox } from "./ShortLinkBox";

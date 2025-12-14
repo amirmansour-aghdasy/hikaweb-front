@@ -25,7 +25,9 @@ RUN find . -name "*.md" -type f -delete
 
 # Set build-time environment variables
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_GOOGLE_VERIFICATION
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_GOOGLE_VERIFICATION=${NEXT_PUBLIC_GOOGLE_VERIFICATION}
 
 # Build Next.js application
 RUN npm run build

@@ -8,6 +8,7 @@ import { PortfolioSlider, GalleryLightbox } from "@/components/common";
 import { ServicePricingPlansSlider, ServiceProcessSlider } from "@/components/sliders";
 import { generateServiceSchema, generateBreadcrumbSchema } from "@/lib/seo";
 import ServiceConsultationBox from "@/components/service/ServiceConsultationBox";
+import ServiceShortLink from "@/components/service/ServiceShortLink";
 import { serverGet } from "@/lib/api/server";
 
 export async function generateMetadata({ params }) {
@@ -25,6 +26,12 @@ export async function generateMetadata({ params }) {
 
         const title = service.name?.fa || service.name || "";
         const description = service.description?.fa || service.shortDescription?.fa || "";
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://hikaweb.ir";
+        const featuredImage = service.featuredImage 
+            ? (service.featuredImage.startsWith('http') 
+                ? service.featuredImage 
+                : `${siteUrl}${service.featuredImage.startsWith('/') ? '' : '/'}${service.featuredImage}`)
+            : `${siteUrl}/assets/logo/large-logo-text.png`;
 
         return {
             title: service.seo?.metaTitle?.fa || `${title} | آژانس دیجیتال مارکتینگ هیکاوب`,
@@ -33,11 +40,26 @@ export async function generateMetadata({ params }) {
             openGraph: {
                 title: title,
                 description: description.substring(0, 160),
-                images: [service.featuredImage || ""],
+                url: `${siteUrl}/service/${slug}`,
+                siteName: "هیکاوب",
+                images: [
+                    {
+                        url: featuredImage,
+                        width: 1200,
+                        height: 630,
+                        alt: title || "خدمت هیکاوب",
+                    },
+                ],
                 type: "website",
             },
+            twitter: {
+                card: "summary_large_image",
+                title: title,
+                description: description.substring(0, 160),
+                images: [featuredImage],
+            },
             alternates: {
-                canonical: `https://hikaweb.ir/service/${slug}`,
+                canonical: `${siteUrl}/service/${slug}`,
             },
         };
     } catch (error) {
@@ -235,8 +257,11 @@ const SingleServiceDetailsPage = async ({ params }) => {
             )}
             <main className="w-full py-5 md:py-14 flex flex-col gap-10 md:gap-14 overflow-hidden md:overflow-visible" id={`${slug}-service-main-content`}>
                 {mainBanner && mainBanner.trim() && (
-                    <Image src={mainBanner} width={1346} height={298} sizes="100vw" className="w-full h-32 md:h-auto" alt={title} title={title} data-aos="zoom-in" priority />
+                    <Image src={mainBanner} width={1346} height={298} sizes="100vw" className="w-full h-32 md:h-auto rounded-3xl" alt={title} title={title} data-aos="zoom-in" priority />
                 )}
+                
+                {/* Short Link Box */}
+                <ServiceShortLink slug={slug} serviceId={service?._id || service?.id} />
                 {firstSectionContent.title && (
                     <section className="w-full grid grid-cols-12 gap-7 place-items-center overflow-hidden">
                         <div className="w-full col-span-12 md:col-span-5 flex flex-col gap-y-3.5">

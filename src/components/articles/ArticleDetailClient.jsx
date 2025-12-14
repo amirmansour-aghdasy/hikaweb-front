@@ -6,11 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { apiClient } from "@/services/api/client";
+import { getBrowserFingerprint } from "@/lib/utils/browserFingerprint";
 import { sanitizeHTML } from "@/lib/utils/sanitize";
 import useAuthStore from "@/lib/store/authStore";
 import ShareButton from "@/components/articles/ShareButton";
 import { BsClock, BsCalendar, BsEye, BsHeart, BsBookmark, BsShare } from "react-icons/bs";
 import BookmarkButton from "@/components/common/BookmarkButton";
+import ShortLinkBox from "@/components/common/ShortLinkBox";
 import { HiOutlineFire, HiStar, HiSparkles } from "react-icons/hi";
 import { FiArrowRight, FiArrowLeft, FiTag } from "react-icons/fi";
 import { MdOutlineMenuBook, MdOutlineArticle } from "react-icons/md";
@@ -104,6 +106,7 @@ export default function ArticleDetailClient({
     const [userRating, setUserRating] = useState(null);
     const contentRef = useRef(null);
     const [isSticky, setIsSticky] = useState(false);
+    const [currentUrl, setCurrentUrl] = useState("");
 
     // Fetch user rating
     useEffect(() => {
@@ -118,6 +121,13 @@ export default function ArticleDetailClient({
 
         fetchUserRating();
     }, [article._id]);
+
+    // Get current URL for short link
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setCurrentUrl(window.location.href);
+        }
+    }, [article._id]); // Re-run when article changes
 
     // Track unique view (without authentication)
     useEffect(() => {
@@ -135,11 +145,26 @@ export default function ArticleDetailClient({
             // Only track if not viewed in last 24 hours
             if (!lastViewTime || (now - parseInt(lastViewTime)) > oneDay) {
                 try {
+                    // Get browser fingerprint for better unique visitor tracking (similar to WordPress)
+                    const browserFingerprint = getBrowserFingerprint();
+                    
                     // Use apiClient for public endpoint (handles CORS properly)
                     // apiClient automatically detects public endpoints and doesn't require token
-                    const response = await apiClient.post(`/articles/${articleId}/view`);
+                    const response = await apiClient.post(`/articles/${articleId}/view`, {
+                        browserFingerprint: browserFingerprint
+                    }, {
+                        headers: {
+                            'X-Browser-Fingerprint': browserFingerprint
+                        }
+                    });
                     
                     if (response?.success) {
+                        // Check if view is duplicate
+                        if (response.data?.isNewView === false) {
+                            // View was already tracked - show info toast
+                            toast.info("بازدید شما قبلاً ثبت شده است");
+                        }
+                        
                         // Mark as viewed in localStorage (with timestamp)
                         localStorage.setItem(storageKey, now.toString());
                         
@@ -187,13 +212,29 @@ export default function ArticleDetailClient({
 
     const handleRating = async (rating) => {
         try {
-            const response = await apiClient.post(`/articles/${article._id}/rate`, { rating });
+            // Get browser fingerprint for better unique visitor tracking (similar to WordPress)
+            const browserFingerprint = getBrowserFingerprint();
+            
+            const response = await apiClient.post(`/articles/${article._id}/rate`, { 
+                rating,
+                browserFingerprint: browserFingerprint
+            }, {
+                headers: {
+                    'X-Browser-Fingerprint': browserFingerprint
+                }
+            });
             setArticle(prev => ({
                 ...prev,
                 ratings: response.data?.data || prev.ratings
             }));
             setUserRating(rating);
-            toast.success("امتیاز شما ثبت شد");
+            
+            // Check if rating is duplicate (update) or new
+            if (response.data?.data?.isNewRating === false) {
+                toast.info("امتیاز شما به‌روزرسانی شد");
+            } else {
+                toast.success("امتیاز شما ثبت شد");
+            }
         } catch (error) {
             toast.error("خطا در ثبت امتیاز");
         }
@@ -224,36 +265,57 @@ export default function ArticleDetailClient({
     // Extract headings for table of contents and add IDs to HTML
     const [headings, setHeadings] = useState([]);
     const [processedContent, setProcessedContent] = useState(content);
+    const [mounted, setMounted] = useState(false);
+
+    // Set mounted state on client
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
-        if (typeof window === 'undefined' || !content) return;
+        // In production, ensure we're on client side
+        if (typeof window === 'undefined' || !content || !mounted) {
+            // Set initial content for SSR
+            if (content) {
+                setProcessedContent(content);
+            }
+            return;
+        }
 
         const processContent = () => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(content, 'text/html');
-            const headingsElements = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
-            
-            const extractedHeadings = Array.from(headingsElements).map((heading, index) => {
-                const id = `heading-${index}`;
-                // Add ID to the heading element in the parsed document
-                heading.setAttribute('id', id);
-                return {
-                    id,
-                    text: heading.textContent?.trim() || '',
-                    level: parseInt(heading.tagName.charAt(1))
-                };
-            });
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(content, 'text/html');
+                // Only extract h2 headings for table of contents
+                const headingsElements = doc.querySelectorAll('h2');
+                
+                const extractedHeadings = Array.from(headingsElements).map((heading, index) => {
+                    const id = `heading-${index}`;
+                    // Add ID to the heading element in the parsed document
+                    heading.setAttribute('id', id);
+                    return {
+                        id,
+                        text: heading.textContent?.trim() || '',
+                        level: 2 // All headings are h2, so level is always 2
+                    };
+                });
 
-            // Get the body element's innerHTML (which contains all the content)
-            const bodyElement = doc.body || doc.documentElement;
-            const processedContentHTML = bodyElement.innerHTML;
+                // Get the body element's innerHTML (which contains all the content)
+                const bodyElement = doc.body || doc.documentElement;
+                const processedContentHTML = bodyElement.innerHTML;
 
-            setProcessedContent(processedContentHTML);
-            setHeadings(extractedHeadings);
+                setProcessedContent(processedContentHTML);
+                setHeadings(extractedHeadings);
+            } catch (error) {
+                console.error('Error processing content:', error);
+                // Fallback: use original content
+                setProcessedContent(content);
+                setHeadings([]);
+            }
         };
 
         processContent();
-    }, [content]);
+    }, [content, mounted]);
 
     // Ensure IDs are set in DOM after render (fallback for edge cases)
     useEffect(() => {
@@ -263,10 +325,10 @@ export default function ArticleDetailClient({
             headings.forEach((heading, index) => {
                 const element = contentRef.current?.querySelector(`#${heading.id}`);
                 if (!element) {
-                    // Try to find heading by index if ID not found
-                    const allHeadings = contentRef.current?.querySelectorAll('h1, h2, h3, h4, h5, h6');
-                    if (allHeadings && index < allHeadings.length) {
-                        allHeadings[index].id = heading.id;
+                    // Try to find h2 heading by index if ID not found
+                    const allH2Headings = contentRef.current?.querySelectorAll('h2');
+                    if (allH2Headings && index < allH2Headings.length) {
+                        allH2Headings[index].id = heading.id;
                     }
                 }
             });
@@ -375,6 +437,18 @@ export default function ArticleDetailClient({
                                 </div>
                             )}
 
+                            {/* Short Link Box */}
+                            {currentUrl && article?._id && (
+                                <div className="mb-6" data-aos="fade-up">
+                                    <ShortLinkBox 
+                                        originalUrl={currentUrl}
+                                        resourceType="article"
+                                        resourceId={article._id}
+                                        label="لینک کوتاه مقاله"
+                                    />
+                                </div>
+                            )}
+
                             {/* Social Share & Actions - Enhanced & Responsive */}
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-3.5 rounded-xl shadow mb-8 bg-white dark:bg-slate-800" data-aos="fade-up">
                                 <div className="flex-shrink-0">
@@ -397,16 +471,21 @@ export default function ArticleDetailClient({
                                     />
                                     <button 
                                         onClick={async () => {
-                                            if (!isAuthenticated) {
-                                                toast.error("لطفا ابتدا وارد شوید");
-                                                router.push("/auth?redirect=" + encodeURIComponent(window.location.pathname));
-                                                return;
-                                            }
-                                            
+                                            // Like no longer requires authentication - uses browser fingerprinting
                                             try {
-                                                const response = await apiClient.post(`/articles/${article._id}/like`);
+                                                // Get browser fingerprint for better unique visitor tracking (similar to WordPress)
+                                                const browserFingerprint = getBrowserFingerprint();
+                                                
+                                                const response = await apiClient.post(`/articles/${article._id}/like`, {
+                                                    browserFingerprint: browserFingerprint
+                                                }, {
+                                                    headers: {
+                                                        'X-Browser-Fingerprint': browserFingerprint
+                                                    }
+                                                });
                                                 const newLikes = response.data?.data?.likes || likes;
                                                 const newIsLiked = response.data?.data?.isLiked !== false; // Default to true if not specified
+                                                const wasAlreadyLiked = response.data?.data?.wasAlreadyLiked || false;
                                                 
                                                 setLikes(newLikes);
                                                 setIsLiked(newIsLiked);
@@ -420,7 +499,12 @@ export default function ArticleDetailClient({
                                                 if (newIsLiked) {
                                                     toast.success("مقاله مورد علاقه شما قرار گرفت");
                                                 } else {
-                                                    toast.success("لایک شما برداشته شد");
+                                                    // If it was already liked, show info toast instead of success
+                                                    if (wasAlreadyLiked) {
+                                                        toast.info("لایک شما برداشته شد");
+                                                    } else {
+                                                        toast.success("لایک شما برداشته شد");
+                                                    }
                                                 }
                                             } catch (error) {
                                                 toast.error(error.response?.data?.message || "خطا در لایک کردن مقاله");
@@ -440,7 +524,7 @@ export default function ArticleDetailClient({
                         </header>
 
                         {/* Table of Contents - Enhanced */}
-                        {headings.length > 0 && (
+                        {mounted && headings.length > 0 && (
                             <div className="mb-10" data-aos="fade-up">
                                 <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-lg border border-slate-200 dark:border-slate-700">
                                     <div className="flex items-center gap-3 mb-4">

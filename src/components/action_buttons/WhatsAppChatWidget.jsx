@@ -486,7 +486,7 @@ export default function WhatsAppChatWidget({
                                     <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-3 mb-2">
                                         <p className="text-sm text-orange-800 dark:text-orange-200 flex items-center gap-2">
                                             <FaClock className="text-xs" />
-                                            {currentAgent.offlineMessage || "متأسفانه در حال حاضر خارج از ساعات کاری هستیم."}
+                                            {currentAgent.offlineMessage || "ارتباط مستقیم با کارشناسان هیکاوب."}
                                         </p>
                                     </div>
                                 )}
@@ -565,7 +565,7 @@ export default function WhatsAppChatWidget({
                                 <p className="text-sm text-slate-600 dark:text-slate-400">
                                     {isOnline
                                         ? "سلام! چطور می‌تونم کمکتون کنم؟"
-                                        : currentAgent.offlineMessage || "متأسفانه در حال حاضر خارج از ساعات کاری هستیم."}
+                                        : currentAgent.offlineMessage || "ارتباط مستقیم با کارشناسان هیکاوب."}
                                 </p>
 
                                 {/* Multiple Agents Selection */}

@@ -16,6 +16,13 @@ export async function generateMetadata({ params }) {
             };
         }
 
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://hikaweb.ir";
+        const featuredImage = article.featuredImage 
+            ? (article.featuredImage.startsWith('http') 
+                ? article.featuredImage 
+                : `${siteUrl}${article.featuredImage.startsWith('/') ? '' : '/'}${article.featuredImage}`)
+            : `${siteUrl}/assets/logo/large-logo-text.png`;
+
         return {
             title: article.seo?.metaTitle?.fa || `${article.title?.fa || article.title} | هیکاوب`,
             description: article.seo?.metaDescription?.fa || article.excerpt?.fa || article.shortDescription?.fa,
@@ -23,8 +30,26 @@ export async function generateMetadata({ params }) {
             openGraph: {
                 title: article.title?.fa || article.title,
                 description: article.excerpt?.fa || article.shortDescription?.fa,
-                images: [article.featuredImage || ""],
+                url: `${siteUrl}/mag/${slug}`,
+                siteName: "هیکاوب",
+                images: [
+                    {
+                        url: featuredImage,
+                        width: 1200,
+                        height: 630,
+                        alt: article.title?.fa || article.title || "مقاله هیکاوب",
+                    },
+                ],
                 type: "article",
+                publishedTime: article.publishedAt,
+                modifiedTime: article.updatedAt || article.publishedAt,
+                authors: [article.author?.name || "تیم هیکاوب"],
+            },
+            twitter: {
+                card: "summary_large_image",
+                title: article.title?.fa || article.title,
+                description: article.excerpt?.fa || article.shortDescription?.fa,
+                images: [featuredImage],
             },
         };
     } catch (error) {

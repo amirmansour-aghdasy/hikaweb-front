@@ -46,6 +46,12 @@ const ALLOWED_ENDPOINTS = [
   /^\/categories(\?.*)?$/,
   // FAQ
   /^\/faq\/service\/[a-zA-Z0-9]{24}(\?.*)?$/, // MongoDB ObjectId format
+  // Team (public only)
+  /^\/team\/public(\?.*)?$/,
+  // Short Links (public)
+  /^\/shortlinks\/get-or-create$/,
+  /^\/shortlinks\/resource\/[^/]+\/[^/]+$/,
+  /^\/shortlinks\/[a-z0-9_-]+(\/info)?$/,
   // Settings (public only)
   /^\/settings\/public$/,
   /^\/settings\/maintenance$/,

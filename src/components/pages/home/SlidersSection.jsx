@@ -38,7 +38,7 @@ const SlidersSection = () => {
                         </Link>
                     </SwiperSlide>
                     <SwiperSlide className="rounded-2xl shadow-md my-7 lg:my-0 overflow-hidden">
-                        <Link href="/service/social-marketing" className="block" title="خدمات سوشال مارکتینگ هیکاوب">
+                        <Link href="/service/social-media-management" className="block" title="خدمات سوشال مارکتینگ هیکاوب">
                             <Image
                                 src="/assets/banners/main-slider-banner-2.webp"
                                 width="0"
