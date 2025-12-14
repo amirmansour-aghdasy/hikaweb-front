@@ -94,14 +94,17 @@ export default async function RootLayout({ children }) {
     let googleVerificationCode = process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || '';
     
     try {
-        // Try to fetch from Settings API (cache for 1 hour)
-        const settingsRes = await safeServerGet('/settings/public', { revalidate: 3600 });
+        // Try to fetch from Settings API (no cache for immediate updates)
+        const settingsRes = await safeServerGet('/settings/public', { revalidate: 0 });
         if (settingsRes?.data?.settings?.seo?.googleSiteVerification) {
             googleVerificationCode = settingsRes.data.settings.seo.googleSiteVerification;
         }
     } catch (error) {
         // Silently fallback to environment variable if API fails
         // This ensures the site still works even if Settings API is unavailable
+        if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to fetch Google verification code from settings:', error);
+        }
     }
 
     return (
