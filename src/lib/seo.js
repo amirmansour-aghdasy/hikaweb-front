@@ -125,3 +125,43 @@ export function generateWebsiteSchema() {
     };
 }
 
+/**
+ * Generate navigation menu structured data for SEO
+ * Helps search engines understand site structure
+ */
+export function generateNavigationSchema(navbarItems) {
+    const menuItems = [];
+    
+    navbarItems.forEach((item, index) => {
+        if (item.url) {
+            menuItems.push({
+                "@type": "SiteNavigationElement",
+                name: item.title,
+                url: item.url.startsWith('http') ? item.url : `${defaultMetadata.siteUrl}${item.url}`,
+                position: index + 1
+            });
+        } else if (item.children && Array.isArray(item.children)) {
+            // Add parent menu item
+            menuItems.push({
+                "@type": "SiteNavigationElement",
+                name: item.title,
+                position: index + 1,
+                hasPart: item.children.map((child, childIndex) => ({
+                    "@type": "SiteNavigationElement",
+                    name: child.title,
+                    url: child.url.startsWith('http') ? child.url : `${defaultMetadata.siteUrl}${child.url}`,
+                    position: childIndex + 1
+                }))
+            });
+        }
+    });
+
+    return {
+        "@context": "https://schema.org",
+        "@type": "SiteNavigationElement",
+        name: "منوی اصلی",
+        url: defaultMetadata.siteUrl,
+        hasPart: menuItems
+    };
+}
+

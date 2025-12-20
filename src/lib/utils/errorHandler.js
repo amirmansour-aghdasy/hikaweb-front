@@ -4,6 +4,7 @@
  */
 
 import toast from "react-hot-toast";
+import { logError, logErrorWithMessage } from "./errorLogger";
 
 /**
  * Get user-friendly error message
@@ -65,9 +66,19 @@ export function handleApiError(error, options = {}) {
         logError = true
     } = options;
 
-    // Log error in development or if explicitly requested
-    if (logError && (process.env.NODE_ENV === 'development' || options.forceLog)) {
+    // Log error in development
+    if (process.env.NODE_ENV === 'development') {
         console.error('API Error:', error);
+    }
+
+    // Log error to error reporting service in production
+    if (logError && process.env.NODE_ENV === 'production') {
+        const userMessage = getErrorMessage(error) || fallbackMessage;
+        logErrorWithMessage(error, userMessage, {
+            type: 'api_error',
+            endpoint: error?.config?.url || error?.url || 'unknown',
+            method: error?.config?.method || 'unknown',
+        });
     }
 
     // Show toast notification if requested
@@ -129,6 +140,13 @@ export function setupGlobalErrorHandlers() {
             console.error('Unhandled Promise Rejection:', error);
         }
         
+        // Log error to error reporting service in production
+        if (process.env.NODE_ENV === 'production') {
+            logError(error, {
+                type: 'unhandled_promise_rejection',
+            });
+        }
+        
         // Show user-friendly error message
         const message = getErrorMessage(error);
         toast.error(message || 'خطایی رخ داد. لطفاً صفحه را رفرش کنید.');
@@ -150,6 +168,16 @@ export function setupGlobalErrorHandlers() {
         const isKnownErrorSource = errorSource.includes('chunk') || 
                                    errorSource.includes('webpack') ||
                                    errorSource.includes('_next');
+        
+        // Log error to error reporting service in production (only for real errors)
+        if (process.env.NODE_ENV === 'production' && !isKnownErrorSource && event.error) {
+            logError(event.error, {
+                type: 'global_error',
+                filename: event.filename || '',
+                lineno: event.lineno || 0,
+                colno: event.colno || 0,
+            });
+        }
         
         // Don't show toast for chunk loading errors or other handled errors
         if (!isKnownErrorSource && event.error) {

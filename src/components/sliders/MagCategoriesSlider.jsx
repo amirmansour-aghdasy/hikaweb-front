@@ -33,10 +33,16 @@ const MagCategoriesSlider = () => {
             className="w-full"
             slidesPerView={1.5}
             modules={[Autoplay]}
-            autoplay={true}
+            autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            }}
+            speed={600}
             loop={true}
             spaceBetween={7}
             centeredSlides={true}
+            watchOverflow={true}
             breakpoints={{ 1024: { slidesPerView: 5.5 } }}
             data-aos="fade-up"
         >

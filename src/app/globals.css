@@ -128,9 +128,34 @@ p::selection {
     height: auto !important;
 }
 
+/* Services Swiper (mySwiper7) - Mobile */
+.mySwiper7 .swiper-wrapper {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+@media (min-width: 768px) {
+    .mySwiper7 .swiper-wrapper {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+}
+
+/* Articles Swiper (mySwiper4) */
+.mySwiper4 .swiper-wrapper {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+@media (min-width: 768px) {
+    .mySwiper4 .swiper-wrapper {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+}
+
+/* Other Swipers */
 .mySwiper3 .swiper-wrapper,
-.mySwiper4 .swiper-wrapper,
-.mySwiper7 .swiper-wrapper,
 .mySwiper8 .swiper-wrapper,
 .mySwiper9 .swiper-wrapper {
     padding: 20px 0 !important;
@@ -152,11 +177,290 @@ p::selection {
 
 @keyframes scroll {
     from {
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
     to {
-        transform: translateX(50%);
+        transform: translate3d(-50%, 0, 0);
     }
+}
+
+/* Optimize scrolling ticker for better performance */
+.our-scrolling-ticker {
+    will-change: transform;
+    contain: layout style paint;
+    /* Reduce motion for users who prefer it */
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .our-scrolling-ticker {
+        will-change: transform;
+    }
+}
+
+.scrolling-ticker-box {
+    will-change: transform;
+    backface-visibility: hidden;
+    perspective: 1000px;
+    /* Optimize for mobile */
+    -webkit-overflow-scrolling: touch;
+}
+
+.scrolling-content {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    /* Force GPU acceleration */
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    /* Smooth animation on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize animation for mobile devices */
+@media (max-width: 768px) {
+    .scrolling-content {
+        /* Faster on mobile but still smooth */
+        animation-duration: 40s;
+    }
+}
+
+/* ============================================
+   STANDARD SPACING SYSTEM
+   ============================================ */
+
+/* Section Spacing - Standardized across all pages */
+.section-spacing {
+    padding-top: 1rem; /* 48px */
+    padding-bottom: 1rem; /* 48px */
+}
+
+@media (min-width: 768px) {
+    .section-spacing {
+        padding-top: 2rem; /* 80px */
+        padding-bottom: 2rem; /* 80px */
+    }
+}
+
+/* Section Heading Spacing - Standardized */
+.section-heading {
+    margin-bottom: 1.5rem; /* 24px */
+}
+
+@media (min-width: 768px) {
+    .section-heading {
+        margin-bottom: 2rem; /* 32px */
+    }
+}
+
+/* Section Content Spacing - Standardized */
+.section-content {
+    margin-top: 1.5rem; /* 24px */
+}
+
+@media (min-width: 768px) {
+    .section-content {
+        margin-top: 2rem; /* 32px */
+    }
+}
+
+/* Main Container Spacing - Standardized */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem; /* 48px between sections */
+}
+
+@media (min-width: 768px) {
+    .main-container {
+        gap: 5rem; /* 80px between sections */
+    }
+}
+
+/* ============================================
+   Brands Swiper Styles
+   ============================================ */
+.brands-swiper {
+    overflow: hidden !important;
+}
+
+.brands-swiper .swiper-wrapper {
+    transition-timing-function: linear !important;
+    /* Add vertical padding based on device size */
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .brands-swiper .swiper-wrapper {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+}
+
+/* Brand Logo Image Styles - Mobile Active Slide Effect */
+@media (max-width: 767px) {
+    /* Default: grayscale only in light mode */
+    .brands-swiper .swiper-slide .brand-logo-image {
+        filter: grayscale(100%);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Dark mode: no grayscale */
+    .dark .brands-swiper .swiper-slide .brand-logo-image {
+        filter: none;
+    }
+    
+    /* Active slide (center): larger scale */
+    .brands-swiper .swiper-slide-active .brand-logo-image,
+    .brands-swiper .swiper-slide-visible.swiper-slide-active .brand-logo-image {
+        filter: grayscale(0%) !important;
+        transform: scale(1.05) !important;
+    }
+    
+    /* Dark mode active slide */
+    .dark .brands-swiper .swiper-slide-active .brand-logo-image,
+    .dark .brands-swiper .swiper-slide-visible.swiper-slide-active .brand-logo-image {
+        filter: none !important;
+        transform: scale(1.05) !important;
+    }
+}
+
+/* Desktop: Hover effect - grayscale only in light mode */
+@media (min-width: 768px) {
+    .brands-swiper .swiper-slide .brand-logo-image {
+        filter: grayscale(100%);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Dark mode: no grayscale */
+    .dark .brands-swiper .swiper-slide .brand-logo-image {
+        filter: none;
+    }
+    
+    .brands-swiper .swiper-slide:hover .brand-logo-image {
+        filter: grayscale(0%);
+    }
+    
+    /* Dark mode hover */
+    .dark .brands-swiper .swiper-slide:hover .brand-logo-image {
+        filter: none;
+    }
+}
+
+/* Portfolio Swiper Styles */
+.portfolio-swiper {
+    overflow: hidden !important;
+}
+
+.portfolio-swiper .swiper-wrapper {
+    /* Add vertical padding based on device size */
+    padding-top: 0.75rem;
+    padding-bottom: 3rem; /* Extra space for pagination */
+}
+
+@media (min-width: 768px) {
+    .portfolio-swiper .swiper-wrapper {
+        padding-top: 1rem;
+        padding-bottom: 3.5rem; /* Extra space for pagination */
+    }
+}
+
+.portfolio-swiper .swiper-slide {
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+/* Make side slides smaller on mobile */
+@media (max-width: 639px) {
+    .portfolio-swiper .swiper-slide:not(.swiper-slide-active) {
+        transform: scale(0.9);
+        opacity: 0.7;
+    }
+    
+    .portfolio-swiper .swiper-slide-active {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Portfolio Swiper Pagination */
+.portfolio-swiper-pagination {
+    position: relative !important;
+    bottom: auto !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.portfolio-swiper-pagination .swiper-pagination-bullet {
+    width: 10px;
+    height: 10px;
+    background: #cbd5e1;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.portfolio-swiper-pagination .swiper-pagination-bullet-active {
+    background: #14b8a6;
+    opacity: 1;
+    width: 24px;
+    border-radius: 5px;
+}
+
+.dark .portfolio-swiper-pagination .swiper-pagination-bullet {
+    background: #475569;
+}
+
+.dark .portfolio-swiper-pagination .swiper-pagination-bullet-active {
+    background: #0d9488;
+}
+
+/* Comments Swiper Styles */
+.comments-swiper {
+    padding-bottom: 50px;
+}
+
+.comments-swiper .swiper-slide {
+    height: auto;
+}
+
+/* Comments Swiper Pagination */
+.comments-swiper-pagination {
+    position: relative !important;
+    bottom: auto !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 24px;
+}
+
+.comments-swiper-pagination .swiper-pagination-bullet {
+    width: 10px;
+    height: 10px;
+    background: #cbd5e1;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.comments-swiper-pagination .swiper-pagination-bullet-active {
+    background: #14b8a6;
+    opacity: 1;
+    width: 24px;
+    border-radius: 5px;
+}
+
+.dark .comments-swiper-pagination .swiper-pagination-bullet {
+    background: #475569;
+}
+
+.dark .comments-swiper-pagination .swiper-pagination-bullet-active {
+    background: #0d9488;
 }
 
 /* AOS Content Visibility Fix */

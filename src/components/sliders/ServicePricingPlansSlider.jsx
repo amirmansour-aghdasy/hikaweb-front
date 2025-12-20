@@ -11,11 +11,17 @@ const ServicePricingPlansSlider = ({ order, slides }) => {
             className="w-full max-w-full md:max-w-6xl mx-auto mySwiper10"
             modules={[Autoplay]}
             slidesPerView={1.3}
-            autoplay={true}
+            autoplay={{
+                delay: 3500,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            }}
+            speed={600}
             loop={slides?.length > 3}
             centeredSlides={true}
             spaceBetween={25}
             autoHeight={true}
+            watchOverflow={true}
             breakpoints={{ 768: { slidesPerView: slides.length > 3 ? 3.5 : 3, spaceBetween: 25, centeredSlides: slides?.length > 3 } }}
             data-aos="fade-up"
         >

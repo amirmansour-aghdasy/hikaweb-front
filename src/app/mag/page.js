@@ -1,16 +1,33 @@
 import { notFound } from "next/navigation";
 import { serverGet } from "@/lib/api/server";
-import { generateBreadcrumbSchema } from "@/lib/seo";
+import { generateBreadcrumbSchema, defaultMetadata } from "@/lib/seo";
 import ArticlesListClient from "@/components/articles/ArticlesListClient";
 
 export const metadata = {
     title: "هیکا مگ | مرجع تخصصی مقالات و اخبار",
-    description: "مرجع تخصصی مقالات و اخبار دنیای تکنولوژی، طراحی و توسعه وب",
-    keywords: "مقالات, اخبار, تکنولوژی, طراحی وب, توسعه وب, هیکاوب",
+    description: "مرجع تخصصی مقالات و اخبار دنیای تکنولوژی، طراحی و توسعه وب، دیجیتال مارکتینگ و برندسازی. مقالات به‌روز و کاربردی از تیم متخصص هیکاوب.",
+    keywords: "مقالات, اخبار, تکنولوژی, طراحی وب, توسعه وب, هیکاوب, دیجیتال مارکتینگ, سئو, برندسازی",
     openGraph: {
         title: "هیکا مگ | مرجع تخصصی مقالات",
-        description: "مرجع تخصصی مقالات و اخبار دنیای تکنولوژی",
+        description: "مرجع تخصصی مقالات و اخبار دنیای تکنولوژی، طراحی و توسعه وب",
+        url: `${defaultMetadata.siteUrl}/mag`,
         type: "website",
+        images: [
+            {
+                url: `${defaultMetadata.siteUrl}/assets/logo/large-logo-text.png`,
+                width: 1200,
+                height: 630,
+                alt: "هیکا مگ",
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "هیکا مگ | مرجع تخصصی مقالات",
+        description: "مرجع تخصصی مقالات و اخبار دنیای تکنولوژی",
+    },
+    alternates: {
+        canonical: `${defaultMetadata.siteUrl}/mag`,
     },
 };
 
@@ -92,15 +109,41 @@ export default async function MagHomePage({ searchParams }) {
 
     // Generate breadcrumb schema
     const breadcrumbSchema = generateBreadcrumbSchema([
-        { name: "صفحه اصلی", url: "https://hikaweb.ir" },
-        { name: "هیکا مگ", url: "https://hikaweb.ir/mag" }
+        { name: "صفحه اصلی", url: defaultMetadata.siteUrl },
+        { name: "هیکا مگ", url: `${defaultMetadata.siteUrl}/mag` }
     ]);
+
+    // Generate CollectionPage schema for articles
+    const collectionSchema = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "هیکا مگ",
+        description: "مرجع تخصصی مقالات و اخبار دنیای تکنولوژی، طراحی و توسعه وب",
+        url: `${defaultMetadata.siteUrl}/mag`,
+        mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: articlesData.pagination?.total || 0,
+            itemListElement: articlesData.data?.slice(0, 10).map((article, index) => ({
+                "@type": "ListItem",
+                position: index + 1,
+                item: {
+                    "@type": "Article",
+                    headline: article.title?.fa || article.title,
+                    url: `${defaultMetadata.siteUrl}/mag/${article.slug?.fa || article.slug?.en || article.slug}`,
+                },
+            })) || [],
+        },
+    };
 
     return (
         <>
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
             />
             <ArticlesListClient
                 initialArticles={articlesData.data}

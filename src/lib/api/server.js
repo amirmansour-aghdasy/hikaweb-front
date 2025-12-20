@@ -36,12 +36,20 @@ const ALLOWED_ENDPOINTS = [
   /^\/services\/slug\/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-zA-Z0-9\-_%]+(\?.*)?$/,
   // Portfolio
   /^\/portfolio(\?.*)?$/,
+  /^\/portfolio\/featured(\?.*)?$/,
   /^\/portfolio\/slug\/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-zA-Z0-9\-_%]+(\?.*)?$/,
+  // Videos
+  /^\/videos(\?.*)?$/,
+  /^\/videos\/featured(\?.*)?$/,
+  /^\/videos\/slug\/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-zA-Z0-9\-_%]+(\?.*)?$/,
+  /^\/videos\/[a-zA-Z0-9]{24}\/(view|like|bookmark|stats|related)(\?.*)?$/,
+  /^\/videos\/[a-zA-Z0-9]{24}(\?.*)?$/, // Get video by ID
   // Brands
   /^\/brands(\?.*)?$/,
   /^\/brands\/featured(\?.*)?$/,
   // Banners
   /^\/banners\/active\/[a-zA-Z0-9\-_]+(\?.*)?$/,
+  /^\/banners\/service\/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-zA-Z0-9\-_%]+(\?.*)?$/,
   // Categories
   /^\/categories(\?.*)?$/,
   // FAQ
@@ -51,7 +59,8 @@ const ALLOWED_ENDPOINTS = [
   // Short Links (public)
   /^\/shortlinks\/get-or-create$/,
   /^\/shortlinks\/resource\/[^/]+\/[^/]+$/,
-  /^\/shortlinks\/[a-z0-9_-]+(\/info)?$/,
+  /^\/shortlinks\/[a-z0-9_-]+\/info$/, // Get short link info
+  /^\/shortlinks\/[a-z0-9_-]+$/, // Redirect short link (handled by Next.js route)
   // Settings (public only)
   /^\/settings\/public$/,
   /^\/settings\/maintenance$/,
@@ -189,10 +198,11 @@ export async function serverFetch(endpoint, options = {}) {
 
     return await response.json();
   } catch (error) {
-    // Only log non-route errors to avoid console spam
-    if (error.code !== 'routeNotFound' && error.code !== 'auth.tokenRequired') {
+    // Only log non-route errors in development to avoid console spam
+    if (process.env.NODE_ENV === 'development' && error.code !== 'routeNotFound' && error.code !== 'auth.tokenRequired') {
       console.error('Server API request error:', error);
     }
+    // In production, errors are handled silently - no console output
     throw error;
   }
 }

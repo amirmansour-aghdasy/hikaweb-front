@@ -11,9 +11,7 @@ export default function ServiceConsultationBox({ serviceName, serviceSlug, servi
     const [isExpanded, setIsExpanded] = useState(false);
     const [formData, setFormData] = useState({
         phone: "",
-        firstName: "",
-        lastName: "",
-        email: "",
+        fullName: "",
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,13 +24,8 @@ export default function ServiceConsultationBox({ serviceName, serviceSlug, servi
             return;
         }
 
-        if (!formData.firstName || !formData.lastName) {
+        if (!formData.fullName || formData.fullName.trim().length < 2) {
             toast.error("لطفاً نام و نام خانوادگی را وارد کنید");
-            return;
-        }
-
-        if (formData.email && !validateEmail(formData.email)) {
-            toast.error("فرمت ایمیل نامعتبر است");
             return;
         }
 
@@ -45,22 +38,16 @@ export default function ServiceConsultationBox({ serviceName, serviceSlug, servi
         try {
             const payload = {
                 phone: formData.phone,
-                firstName: sanitizeText(formData.firstName),
-                lastName: sanitizeText(formData.lastName),
+                fullName: sanitizeText(formData.fullName.trim()),
                 serviceId: serviceId,
             };
-            
-            // Only include email if it's provided and not empty
-            if (formData.email && formData.email.trim()) {
-                payload.email = formData.email.toLowerCase().trim();
-            }
             
             await apiClient.post("/consultations/simple", payload);
             
             toast.success("درخواست مشاوره شما با موفقیت ثبت شد. به زودی با شما تماس خواهیم گرفت.");
             
             // Reset form and collapse
-            setFormData({ phone: "", firstName: "", lastName: "", email: "" });
+            setFormData({ phone: "", fullName: "" });
             setIsExpanded(false);
         } catch (error) {
             const errorMessage = error.response?.data?.message || error.message || "خطا در ثبت درخواست. لطفاً دوباره تلاش کنید.";
@@ -126,28 +113,16 @@ export default function ServiceConsultationBox({ serviceName, serviceSlug, servi
                             </div>
                             
                             <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-xl p-4 md:p-5 space-y-3 md:space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <input
-                                        type="text"
-                                        name="firstName"
-                                        value={formData.firstName}
-                                        onChange={(e) => setFormData({ ...formData, firstName: sanitizeText(e.target.value) })}
-                                        maxLength={50}
-                                        className="w-full rounded-lg outline-none bg-slate-50 dark:bg-slate-700 p-3 text-sm border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-teal-500 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-400/20"
-                                        placeholder="نام"
-                                        required
-                                    />
-                                    <input
-                                        type="text"
-                                        name="lastName"
-                                        value={formData.lastName}
-                                        onChange={(e) => setFormData({ ...formData, lastName: sanitizeText(e.target.value) })}
-                                        maxLength={50}
-                                        className="w-full rounded-lg outline-none bg-slate-50 dark:bg-slate-700 p-3 text-sm border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-teal-500 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-400/20"
-                                        placeholder="نام خانوادگی"
-                                        required
-                                    />
-                                </div>
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={formData.fullName}
+                                    onChange={(e) => setFormData({ ...formData, fullName: sanitizeText(e.target.value) })}
+                                    maxLength={100}
+                                    className="w-full rounded-lg outline-none bg-slate-50 dark:bg-slate-700 p-3 text-sm border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-teal-500 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-400/20"
+                                    placeholder="نام و نام خانوادگی"
+                                    required
+                                />
                                 <input
                                     type="tel"
                                     name="phone"
@@ -156,19 +131,6 @@ export default function ServiceConsultationBox({ serviceName, serviceSlug, servi
                                     className="w-full rounded-lg outline-none bg-slate-50 dark:bg-slate-700 p-3 text-sm border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-right placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-teal-500 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-400/20"
                                     placeholder="شماره موبایل"
                                     required
-                                />
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase().trim() })}
-                                    onBlur={(e) => {
-                                        if (e.target.value && !validateEmail(e.target.value)) {
-                                            toast.error("فرمت ایمیل نامعتبر است");
-                                        }
-                                    }}
-                                    className="w-full rounded-lg outline-none bg-slate-50 dark:bg-slate-700 p-3 text-sm border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-teal-500 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 dark:focus:ring-teal-400/20"
-                                    placeholder="ایمیل (اختیاری)"
                                 />
                                 <button
                                     type="submit"

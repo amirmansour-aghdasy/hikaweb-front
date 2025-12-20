@@ -100,13 +100,13 @@ export default async function ServicesPage() {
                 />
             )}
 
-            <main className="w-full py-5 md:py-14 flex flex-col gap-10 md:gap-14" id="services-listing-page">
+            <main className="w-full main-container" id="services-listing-page">
                 {/* Hero Section */}
-                <section className="w-full relative overflow-hidden">
+                <section className="w-full section-spacing relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-teal-50 via-teal-100/50 to-transparent dark:from-teal-950/30 dark:via-teal-900/20 dark:to-transparent -z-10"></div>
                     <div className="container mx-auto px-4 md:px-6">
-                        <div className="max-w-4xl mx-auto text-center py-8 md:py-12" data-aos="fade-up">
-                            <h1 className="text-3xl md:text-5xl font-bold text-slate-800 dark:text-slate-100 mb-4 md:mb-6">
+                        <div className="max-w-4xl mx-auto text-center" data-aos="fade-up">
+                            <h1 className="text-3xl md:text-5xl font-bold text-slate-800 dark:text-slate-100 section-heading">
                                 خدمات <span className="text-teal-600 dark:text-teal-400">هیکاوب</span>
                             </h1>
                             <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
@@ -118,23 +118,23 @@ export default async function ServicesPage() {
 
                 {/* Featured Services Section */}
                 {services.length > 0 && (
-                    <section className="w-full container mx-auto px-4 md:px-6">
+                    <section className="w-full section-spacing container mx-auto px-4 md:px-6">
                         <FeaturedServicesSection services={services} />
                     </section>
                 )}
 
                 {/* Stats Section */}
-                <section className="w-full container mx-auto px-4 md:px-6">
+                <section className="w-full section-spacing container mx-auto px-4 md:px-6">
                     <StatsSection />
                 </section>
 
                 {/* Services Listing */}
-                <section className="w-full container mx-auto px-4 md:px-6">
+                <section className="w-full section-spacing container mx-auto px-4 md:px-6">
                     <ServicesListingClient services={services} />
                 </section>
 
                 {/* CTA Section */}
-                <section className="w-full container mx-auto px-4 md:px-6">
+                <section className="w-full section-spacing container mx-auto px-4 md:px-6">
                     <div className="bg-gradient-to-r from-teal-600 to-teal-700 dark:from-teal-800 dark:to-teal-900 rounded-2xl md:rounded-3xl p-6 md:p-12 text-center" data-aos="zoom-in">
                         <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6">
                             آماده شروع هستید؟

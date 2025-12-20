@@ -112,9 +112,9 @@ export default function PortfolioPageClient({ brands = [], services = [] }) {
     };
 
     return (
-        <main className="w-full py-5 md:py-14 flex flex-col gap-10 md:gap-14">
+        <main className="w-full main-container">
             {/* Hero Section - Compact */}
-            <section className="relative w-full py-8 md:py-12 overflow-hidden">
+            <section className="relative w-full section-spacing overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50 dark:from-teal-900/20 dark:via-blue-900/20 dark:to-purple-900/20"></div>
                 
                 <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -203,7 +203,7 @@ export default function PortfolioPageClient({ brands = [], services = [] }) {
             </section>
 
             {/* Brands Grid */}
-            <section className="container mx-auto px-4 md:px-6 py-8 md:py-12">
+            <section className="container mx-auto px-4 md:px-6 section-spacing">
                 {paginatedBrands.length === 0 ? (
                     <div className="text-center py-16" data-aos="fade-up">
                         <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full mb-4">
@@ -287,7 +287,7 @@ export default function PortfolioPageClient({ brands = [], services = [] }) {
             </section>
 
             {/* CTA Section */}
-            <section className="w-full container mx-auto px-4 md:px-6">
+            <section className="w-full container mx-auto px-4 md:px-6 section-spacing">
                 <div className="bg-gradient-to-r from-teal-600 to-blue-600 dark:from-teal-700 dark:to-blue-700 rounded-2xl p-6 md:p-10 text-center relative overflow-hidden" data-aos="fade-up">
                     <div className="relative z-10">
                         <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-3">

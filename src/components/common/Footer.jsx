@@ -75,7 +75,7 @@ const Footer = async () => {
                                         alt="هیکاوب - آژانس دیجیتال مارکتینگ" 
                                         title="هیکاوب"
                                         className="h-10 w-auto"
-                                        style={{ width: 'auto', height: '40px' }}
+                                        style={{ width: 'auto', height: 'auto' }}
                                         priority={false}
                                     />
                                 </Link>
@@ -95,6 +95,17 @@ const Footer = async () => {
                                             data-aos-delay="200"
                                         >
                                             مجله
+                                        </Link>
+                                    </li>
+                                    <li className="text-slate-500">|</li>
+                                    <li>
+                                        <Link 
+                                            href="/theater" 
+                                            className="text-sm text-teal-400 hover:text-teal-300 transition-colors duration-200 hover:underline"
+                                            data-aos="fade-up"
+                                            data-aos-delay="225"
+                                        >
+                                            تماشاخانه
                                         </Link>
                                     </li>
                                     <li className="text-slate-500">|</li>
@@ -188,11 +199,10 @@ const Footer = async () => {
                                     {latestPortfolios.length > 0 ? (
                                         latestPortfolios.slice(0, 5).map((portfolio, index) => {
                                             const title = portfolio.title?.fa || portfolio.title || portfolio.client?.name || "نمونه کار";
-                                            const slug = portfolio.slug?.fa || portfolio.slug?.en || portfolio.slug || portfolio._id;
                                             return (
                                                 <li key={portfolio._id || index} data-aos="fade-left" data-aos-delay={index * 50}>
                                                     <Link 
-                                                        href={`/portfolio/${slug}`}
+                                                        href="/portfolio"
                                                         className="text-sm text-slate-300 hover:text-teal-400 transition-colors duration-200 block group"
                                                         title={title}
                                                     >

@@ -1,11 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { BsEye } from "react-icons/bs";
 import { FiArrowLeft } from "react-icons/fi";
+import ProjectModal from "@/components/portfolio/ProjectModal";
 
 export default function RelatedPortfolios({ portfolios = [] }) {
+    const [selectedProject, setSelectedProject] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     if (!portfolios || portfolios.length === 0) {
         return null;
     }
@@ -25,10 +30,13 @@ export default function RelatedPortfolios({ portfolios = [] }) {
                     const description = portfolio.shortDescription?.fa || portfolio.description?.fa || "";
                     
                     return (
-                        <Link
+                        <div
                             key={portfolio._id}
-                            href={`/portfolio/${slug}`}
-                            className="group block rounded-xl bg-white dark:bg-slate-800 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 dark:border-slate-700"
+                            className="group block rounded-xl bg-white dark:bg-slate-800 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 dark:border-slate-700 cursor-pointer"
+                            onClick={() => {
+                                setSelectedProject(portfolio);
+                                setIsModalOpen(true);
+                            }}
                         >
                             <div className="relative h-48 overflow-hidden bg-slate-100">
                                 <Image
@@ -62,10 +70,22 @@ export default function RelatedPortfolios({ portfolios = [] }) {
                                     <FiArrowLeft className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </div>
                             </div>
-                        </Link>
+                        </div>
                     );
                 })}
             </div>
+
+            {/* Project Modal */}
+            {selectedProject && (
+                <ProjectModal
+                    project={selectedProject}
+                    isOpen={isModalOpen}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setTimeout(() => setSelectedProject(null), 300);
+                    }}
+                />
+            )}
         </section>
     );
 }

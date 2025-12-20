@@ -37,7 +37,10 @@ export default function RelatedArticlesSlider({ articles = [] }) {
                 autoplay={{
                     delay: 5000,
                     disableOnInteraction: false,
+                    pauseOnMouseEnter: true,
                 }}
+                speed={600}
+                watchOverflow={true}
             >
                 {articles.map((article) => {
                     const formattedArticle = {

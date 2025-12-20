@@ -134,7 +134,7 @@ export default function ArticlesListClient({
         description: article.excerpt?.fa || article.shortDescription?.fa || "",
         thumbnail: article.featuredImage || "/assets/images/post-thumb-1.webp",
         createdAt: article.publishedAt || article.createdAt,
-        readTime: `${article.readTime || 5} دقیقه`,
+        readTime: `${article.readTime || 5}`,
         slug: article.slug?.fa || article.slug?.en || article.slug,
         views: article.views || 0,
         article

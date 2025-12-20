@@ -5,9 +5,9 @@ import { Suspense } from "react";
 import { AnimatedText } from "@/components/ui";
 import { info_preview } from "@/lib/constants";
 import { CounselingForm } from "@/components/forms";
-import { InfoPreviewCard, CommentCard } from "@/components/cards";
+import { InfoPreviewCard } from "@/components/cards";
 import { InstagramOutlined, RubikaFill, TelegramFill, WhatsAppOutlined } from "@/lib/icons";
-import { SlidersSection, ServicesSection, BannersSection, BrandsSection, MagPreviewSection } from "@/components/pages/home";
+import { SlidersSection, ServicesSection, BannersSection, BrandsSection, MagPreviewSection, PortfolioSection, CommentsSection } from "@/components/pages/home";
 import { serverGet } from "@/lib/api/server";
 import { defaultMetadata } from "@/lib/seo";
 
@@ -38,11 +38,12 @@ export const metadata = {
 
 const HomePage = async () => {
     // Fetch data in parallel for better performance
-    const [articlesRes, servicesRes, brandsRes, bannersRes] = await Promise.allSettled([
+    const [articlesRes, servicesRes, brandsRes, bannersRes, portfoliosRes] = await Promise.allSettled([
         serverGet('/articles/featured?limit=6', { revalidate: 300 }), // 5 minutes cache
         serverGet('/services?status=active&limit=50', { revalidate: 600 }), // 10 minutes cache
         serverGet('/brands/featured?limit=50', { revalidate: 1800 }), // 30 minutes cache
         serverGet('/banners/active/home-page-banners', { revalidate: 300 }), // 5 minutes cache
+        serverGet('/portfolio/featured?limit=8', { revalidate: 600 }), // 10 minutes cache
     ]);
 
     // Process articles
@@ -120,13 +121,55 @@ const HomePage = async () => {
         }
     }
 
-    // Fetch user comments from API (optional - will use fallback if fails)
-    let users_comment = [];
+    // Process portfolios
+    let portfolios = [];
+    if (portfoliosRes.status === 'fulfilled') {
+        try {
+            const portfoliosData = portfoliosRes.value.data || {};
+            portfolios = portfoliosData.portfolios || portfoliosData.data || [];
+        } catch (error) {
+            console.error("Error processing portfolios:", error);
+        }
+    }
+
+    // User comments data
+    const users_comment = [
+        {
+            writer: "مریم کاشانی",
+            position: "مدیر برند کیوتی کیدز",
+            text: "سلام من مریم کاشانی هستم که برندم یعنی کیوتی کیدز رو از سال 1401 با هیکاوب استارت زدم و این تیم به کسب و کار من دلسوزانه کمک میکرد و باعث شد کسب و کار من در زمینه های بسیاری هم در اینستاگرام هم در بسته بندی و فرایند فروش پیشرفت کنه",
+            thumbnail: null,
+        },
+        {
+            writer: "محسن محبی",
+            position: "مدیر برند باردوبایک",
+            text: "من سالهای زیادیه که در زمین فروش و تولید دوچرخه فعالیت دارم و برند باردوبایک رو با تیم هیکاوب از همون اول استارتشو زدم از طراحی لوگو و رنگ سازمانی تا تولید محتوا و اینستاگرام و تبلیغات نمایشگاه وامور چاپ کسب و کارم و راضی بودم از این تیم",
+            thumbnail: null,
+        },
+        {
+            writer: "ندا کارآزموده",
+            position: "مدیر کلینیک ونوس",
+            text: "هیکاوب در تولید محتوا و مدیریت اینستاگرام و چاپ تراکت به ما خیلی کمک کرد و مهمترین چیز تعهد کاریه این تیم هستش که توی یک سال همکاری بنده دیدم اینو مرسی از شما",
+            thumbnail: null,
+        },
+        {
+            writer: "مهدی رسولی",
+            position: "مدیر برند کیف فرند",
+            text: "هیکاوب در فضای مجازی به بنده کمک کرد و بگ های بسته بندی منو طراحی و چاپ کرد و به مشهد ارسال کرد و میتونم بگم حرفشون با عملشون یکیه و وعده بعیدی در کار نیست و کارشونو به درستی انجام میدن",
+            thumbnail: null,
+        },
+        {
+            writer: "سعید احمدی",
+            position: "مدیر برند آرتمیس ویزا",
+            text: "من با این تیم در زمینه چاپ و تبلیغات محیطی همکاری داشتم و میتونم بگم در این زمینه به حد بسیار مقبولی خوش قول و متعهد هستن و شما امور چاپتون رو میتونید با خیال راحت به هیکاوب بسپارید",
+            thumbnail: null,
+        },
+    ];
 
     return (
-        <main className="w-full flex flex-col gap-10 mb-5 md:my-14 overflow-x-hidden md:overflow-x-visible" id="home-page-main">
+        <main className="w-full main-container overflow-x-hidden md:overflow-x-visible py-5 md:py-10" id="home-page-main">
             <SlidersSection />
-            <section id="introduction-section" className="w-full grid grid-cols-12 gap-7 md:gap-0">
+            <section id="introduction-section" className="w-full section-spacing grid grid-cols-12 gap-7 md:gap-0">
                 <div className="col-span-12 md:col-span-6 flex flex-col items-start justify-center order-2 md:order-1">
                     <h1 className="text-2xl md:text-4xl text-teal-500 font-bold" data-aos="fade-up">
                         <AnimatedText strings={["آژانس دیجیتال مارکتینگ هیکاوب"]} typeSpeed={60} loop={false} startDelay={1500} hideCursorOnEnd={true} />
@@ -200,30 +243,15 @@ const HomePage = async () => {
             <Suspense fallback={<div className="w-full h-32 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl" />}>
                 <BrandsSection brands={brands} />
             </Suspense>
+            <Suspense fallback={<div className="w-full h-96 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl" />}>
+                <PortfolioSection projects={portfolios} />
+            </Suspense>
             {users_comment.length > 0 && (
-                <section id="comments-section" className="w-full">
-                    <h4
-                        className="text-lg relative font-bold flex items-center text-slate-700 dark:text-slate-200 before:content-[''] before:absolute before:-right-[2015px] before:w-[2000px] before:rounded-full before:h-1 before:bg-teal-100 dark:before:bg-teal-900/30 after:content=[''] after:absolute after:w-[30px] after:h-1 after:bg-teal-500 dark:after:bg-teal-600 after:rounded-full after:-right-[45px]"
-                        data-aos="fade-left"
-                    >
-                        نظرات کاربران درباره هیکاوب
-                    </h4>
-                    <div className="our-scrolling-ticker">
-                        <div className="scrolling-ticker-box relative flex overflow-hidden select-none gap-5 items-center">
-                            <div className="scrolling-content shrink-0 flex gap-3.5 md:gap-5 min-w-full animate-scroll [animation-direction:reverse] py-5 md:py-10">
-                                {[...users_comment, ...users_comment].map((comment, index) => (
-                                    <div key={index} className="w-80 md:w-96 shadow-md rounded-2xl overflow-hidden" data-aos="fade-up" data-aos-delay={index * 150}>
-                                        <CommentCard comment={comment} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                <CommentsSection comments={users_comment} />
             )}
             <section
                 id="counseling"
-                className="w-full shadow-md rounded-2xl grid grid-cols-1 p-3.5 md:px-0 md:py-0 md:grid-cols-2 items-center gap-x-3.5 gap-y-7 md:gap-y-0 bg-counseling-img bg-cover h-auto md:h-[476px] bg-no-repeat bg-center relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:w-full before:h-full before:bg-slate-900/80"
+                className="w-full section-spacing shadow-md rounded-2xl grid grid-cols-1 p-3.5 md:px-0 md:py-0 md:grid-cols-2 items-center gap-x-3.5 gap-y-7 md:gap-y-0 bg-counseling-img bg-cover h-auto md:h-[476px] bg-no-repeat bg-center relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:w-full before:h-full before:bg-slate-900/80"
                 data-aos="zoom-in"
             >
                 <div className="w-full z-10 flex flex-col justify-center items-center gap-3.5 md:gap-7">

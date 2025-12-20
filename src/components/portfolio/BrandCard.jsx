@@ -4,10 +4,13 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { HiArrowTopRightOnSquare, HiCheck, HiArrowLeft, HiSparkles } from "react-icons/hi2";
+import ProjectModal from "./ProjectModal";
 
 export default function BrandCard({ brand, index }) {
     const [expanded, setExpanded] = useState(false);
     const [hoveredProject, setHoveredProject] = useState(null);
+    const [selectedProject, setSelectedProject] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Safety checks
     if (!brand || !brand.name) {
@@ -134,12 +137,15 @@ export default function BrandCard({ brand, index }) {
                         const projectImage = project.featuredImage || "/assets/images/portfolio-placeholder.jpg";
 
                         return (
-                            <Link
+                            <div
                                 key={project._id}
-                                href={`/portfolio/${projectSlug}`}
-                                className="block group"
+                                className="block group cursor-pointer"
                                 onMouseEnter={() => setHoveredProject(project._id)}
                                 onMouseLeave={() => setHoveredProject(null)}
+                                onClick={() => {
+                                    setSelectedProject(project);
+                                    setIsModalOpen(true);
+                                }}
                             >
                                 <div className="flex gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all duration-300 border border-transparent hover:border-teal-200 dark:hover:border-teal-800">
                                     {/* Project Image - Smaller */}
@@ -150,7 +156,8 @@ export default function BrandCard({ brand, index }) {
                                             fill
                                             sizes="(max-width: 768px) 64px, 80px"
                                             className="object-cover transition-transform duration-300 group-hover:scale-110"
-                                            unoptimized
+                                            loading="lazy"
+                                            quality={85}
                                         />
                                         {project.isFeatured && (
                                             <div className="absolute top-1 right-1">
@@ -204,10 +211,22 @@ export default function BrandCard({ brand, index }) {
                                         <HiArrowLeft className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${hoveredProject === project._id ? 'translate-x-[-3px] text-teal-600 dark:text-teal-400' : ''}`} />
                                     </div>
                                 </div>
-                            </Link>
+                            </div>
                         );
                     })}
                 </div>
+
+                {/* Project Modal */}
+                {selectedProject && (
+                    <ProjectModal
+                        project={selectedProject}
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setTimeout(() => setSelectedProject(null), 300);
+                        }}
+                    />
+                )}
 
                 {/* Expand/Collapse Button - Compact */}
                 {projectCount > displayProjects.length && (

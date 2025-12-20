@@ -3,17 +3,30 @@ import Image from "next/image";
 import { ContactUsForm } from "@/components/forms";
 import MapWrapper from "@/components/map/MapWrapper";
 import { CallCallingFill, InstagramOutlined, LocationFill, RubikaFill, TelegramFill, WhatsAppOutlined } from "@/lib/icons";
-import { defaultMetadata } from "@/lib/seo";
+import { defaultMetadata, generateBreadcrumbSchema } from "@/lib/seo";
 
 export const metadata = {
     title: "تماس با ما | هیکاوب",
-    description: "برای ارتباط با تیم هیکاوب و دریافت مشاوره رایگان، با ما تماس بگیرید. آدرس: تهران، بزرگراه اشرفی اصفهانی، محمدی (محله‌ی مرزداران)",
-    keywords: "تماس با هیکاوب, آدرس هیکاوب, شماره تماس هیکاوب, مشاوره رایگان",
+    description: "برای ارتباط با تیم هیکاوب و دریافت مشاوره رایگان، با ما تماس بگیرید. آدرس: تهران، بزرگراه اشرفی اصفهانی، محمدی (محله‌ی مرزداران). شماره تماس: 09120997935",
+    keywords: "تماس با هیکاوب, آدرس هیکاوب, شماره تماس هیکاوب, مشاوره رایگان, تماس با آژانس دیجیتال مارکتینگ",
     openGraph: {
         title: "تماس با ما | هیکاوب",
         description: "برای ارتباط با تیم هیکاوب و دریافت مشاوره رایگان، با ما تماس بگیرید",
         url: `${defaultMetadata.siteUrl}/contact-us`,
         type: "website",
+        images: [
+            {
+                url: `${defaultMetadata.siteUrl}/assets/logo/large-logo-text.png`,
+                width: 1200,
+                height: 630,
+                alt: "تماس با هیکاوب",
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "تماس با ما | هیکاوب",
+        description: "برای ارتباط با تیم هیکاوب و دریافت مشاوره رایگان، با ما تماس بگیرید",
     },
     alternates: {
         canonical: `${defaultMetadata.siteUrl}/contact-us`,
@@ -21,8 +34,62 @@ export const metadata = {
 };
 
 const ContactUsPage = () => {
+    // Generate structured data for contact page
+    const contactPageSchema = {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        name: "تماس با ما",
+        description: "صفحه تماس با تیم هیکاوب",
+        url: `${defaultMetadata.siteUrl}/contact-us`,
+        mainEntity: {
+            "@type": "Organization",
+            name: "هیکاوب",
+            url: defaultMetadata.siteUrl,
+            contactPoint: [
+                {
+                    "@type": "ContactPoint",
+                    telephone: "+98-912-099-7935",
+                    contactType: "Customer Service",
+                    areaServed: "IR",
+                    availableLanguage: ["Persian", "English"]
+                },
+                {
+                    "@type": "ContactPoint",
+                    telephone: "+98-21-4427-6519",
+                    contactType: "Customer Service",
+                    areaServed: "IR",
+                    availableLanguage: ["Persian"]
+                }
+            ],
+            address: {
+                "@type": "PostalAddress",
+                streetAddress: "بزرگراه اشرفی اصفهانی، محمدی (محله‌ی مرزداران)",
+                addressLocality: "تهران",
+                addressCountry: "IR"
+            },
+            sameAs: [
+                "https://www.instagram.com/hikaweb.ir/",
+                "https://t.me/hikaweb"
+            ]
+        }
+    };
+
+    const breadcrumbSchema = generateBreadcrumbSchema([
+        { name: "صفحه اصلی", url: defaultMetadata.siteUrl },
+        { name: "تماس با ما", url: `${defaultMetadata.siteUrl}/contact-us` },
+    ]);
+
     return (
-        <main className="w-full py-7 md:py-14 flex flex-col gap-7 md:gap-14 overflow-hidden md:overflow-visible">
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageSchema) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+            />
+            <main className="w-full py-7 md:py-14 flex flex-col gap-7 md:gap-14 overflow-hidden md:overflow-visible">
             <Image src="/assets/banners/contact-us.webp" sizes="100vw" width={1440} height={374} className="w-full h-32 md:h-auto rounded-2xl" alt="تماس با ما" title="تماس با ما" data-aos="zoom-in" priority />
             <section className="w-full grid grid-cols-12 items-stretch gap-7">
                 <div className="w-full flex flex-1 col-span-12 md:col-span-4">
@@ -73,6 +140,7 @@ const ContactUsPage = () => {
                 </div>
             </section>
         </main>
+        </>
     );
 };
 

@@ -9,6 +9,7 @@ import { ServicePricingPlansSlider, ServiceProcessSlider } from "@/components/sl
 import { generateServiceSchema, generateBreadcrumbSchema } from "@/lib/seo";
 import ServiceConsultationBox from "@/components/service/ServiceConsultationBox";
 import ServiceShortLink from "@/components/service/ServiceShortLink";
+import ServiceBanner from "@/components/common/ServiceBanner";
 import { serverGet } from "@/lib/api/server";
 
 export async function generateMetadata({ params }) {
@@ -73,22 +74,44 @@ export async function generateMetadata({ params }) {
 const SingleServiceDetailsPage = async ({ params }) => {
     const { slug } = await params;
 
+    // Fetch service and banner in parallel for better performance
+    const [serviceRes, bannerRes] = await Promise.allSettled([
+        serverGet(`/services/slug/${slug}?lang=fa`, { revalidate: 300 }),
+        serverGet(`/banners/service/${slug}`, { revalidate: 300 })
+    ]);
+
     let service;
-    try {
-        const data = await serverGet(`/services/slug/${slug}?lang=fa`);
-        service = data.data?.service;
-        
-        if (!service) {
+    if (serviceRes.status === 'fulfilled') {
+        try {
+            service = serviceRes.value.data?.service;
+            if (!service) {
+                notFound();
+            }
+        } catch (error) {
+            console.error("Error processing service:", error);
             notFound();
         }
-    } catch (error) {
-        console.error("Error fetching service:", error);
+    } else {
         notFound();
     }
 
     // Transform service data to component structure
     const title = service.name?.fa || service.name || "";
-    const mainBanner = service.featuredImage || "";
+    
+    // Process banner (optional - silently fail if not available)
+    let serviceBanner = null;
+    if (bannerRes.status === 'fulfilled') {
+        try {
+            serviceBanner = bannerRes.value.data?.banner || null;
+        } catch (error) {
+            // Silently fail - will use fallback
+            console.error("Error processing service banner:", error);
+        }
+    }
+    
+    // Fallback to service featuredImage if no banner from system
+    const fallbackBanner = service.featuredImage || "";
+    
     const mainContent = service.mainContent || {
         firstSection: { content: {}, slides: [] },
         secondSection: { content: {}, slides: [] },
@@ -256,9 +279,12 @@ const SingleServiceDetailsPage = async ({ params }) => {
                 />
             )}
             <main className="w-full py-5 md:py-14 flex flex-col gap-10 md:gap-14 overflow-hidden md:overflow-visible" id={`${slug}-service-main-content`}>
-                {mainBanner && mainBanner.trim() && (
-                    <Image src={mainBanner} width={1346} height={298} sizes="100vw" className="w-full h-32 md:h-auto rounded-3xl" alt={title} title={title} data-aos="zoom-in" priority />
-                )}
+                {/* Service Banner - from banner system or fallback to featuredImage */}
+                <ServiceBanner 
+                    banner={serviceBanner} 
+                    fallbackImage={fallbackBanner} 
+                    fallbackAlt={title}
+                />
                 
                 {/* Short Link Box */}
                 <ServiceShortLink slug={slug} serviceId={service?._id || service?.id} />

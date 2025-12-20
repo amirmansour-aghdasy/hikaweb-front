@@ -4,6 +4,7 @@ import React from "react";
 import { HiExclamationTriangle } from "react-icons/hi2";
 import { HiRefresh, HiHome } from "react-icons/hi";
 import Link from "next/link";
+import { logError } from "@/lib/utils/errorLogger";
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -26,14 +27,19 @@ class ErrorBoundary extends React.Component {
             console.error('ErrorBoundary caught an error:', error, errorInfo);
         }
 
+        // Log error to error reporting service in production
+        if (process.env.NODE_ENV === 'production') {
+            logError(error, {
+                type: 'error_boundary',
+                componentStack: errorInfo?.componentStack || '',
+            });
+        }
+
         // Update state with error details
         this.setState({
             error,
             errorInfo
         });
-
-        // You can also log the error to an error reporting service here
-        // Example: logErrorToService(error, errorInfo);
     }
 
     handleReset = () => {

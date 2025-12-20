@@ -1,18 +1,31 @@
 import Image from "next/image";
 
 import TeamMemberCard from "@/components/cards/TeamMemberCard";
-import { defaultMetadata } from "@/lib/seo";
+import { defaultMetadata, generateOrganizationSchema, generateBreadcrumbSchema } from "@/lib/seo";
 import { serverGet } from "@/lib/api/server";
 
 export const metadata = {
     title: "درباره ما | هیکاوب",
-    description: "هیکاوب از سال 1399 فعالیت خود را در زمینه مارکتینگ و دیجیتال مارکتینگ استارت زده و مفتخر است به بیش از 70 کسب و کار ایرانی کمک کرده است",
-    keywords: "درباره هیکاوب, تیم هیکاوب, آژانس دیجیتال مارکتینگ, هیکاوب",
+    description: "هیکاوب از سال 1399 فعالیت خود را در زمینه مارکتینگ و دیجیتال مارکتینگ استارت زده و مفتخر است به بیش از 70 کسب و کار ایرانی کمک کرده است. تیم حرفه‌ای ما در زمینه‌های طراحی سایت، سئو، برندسازی و دیجیتال مارکتینگ فعالیت می‌کند.",
+    keywords: "درباره هیکاوب, تیم هیکاوب, آژانس دیجیتال مارکتینگ, هیکاوب, تاریخچه هیکاوب, تیم حرفه‌ای",
     openGraph: {
         title: "درباره ما | هیکاوب",
-        description: "هیکاوب انرژی هر کسب و کار",
+        description: "هیکاوب انرژی هر کسب و کار - آژانس دیجیتال مارکتینگ با بیش از 4 سال سابقه",
         url: `${defaultMetadata.siteUrl}/about-us`,
         type: "website",
+        images: [
+            {
+                url: `${defaultMetadata.siteUrl}/assets/logo/large-logo-text.png`,
+                width: 1200,
+                height: 630,
+                alt: "درباره هیکاوب",
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "درباره ما | هیکاوب",
+        description: "هیکاوب انرژی هر کسب و کار",
     },
     alternates: {
         canonical: `${defaultMetadata.siteUrl}/about-us`,
@@ -36,8 +49,24 @@ const AboutUsPage = async () => {
         // Fallback to empty array if API fails
         teamMembers = [];
     }
+    // Generate structured data
+    const organizationSchema = generateOrganizationSchema();
+    const breadcrumbSchema = generateBreadcrumbSchema([
+        { name: "صفحه اصلی", url: defaultMetadata.siteUrl },
+        { name: "درباره ما", url: `${defaultMetadata.siteUrl}/about-us` },
+    ]);
+
     return (
-        <main className="w-full py-7 md:py-14 flex flex-col gap-7 md:gap-14 overflow-hidden md:overflow-visible">
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+            />
+            <main className="w-full py-7 md:py-14 flex flex-col gap-7 md:gap-14 overflow-hidden md:overflow-visible">
             <Image
                 src="/assets/banners/about-us.webp"
                 sizes="100vw"
@@ -107,6 +136,7 @@ const AboutUsPage = async () => {
                 </div>
             </section>
         </main>
+        </>
     );
 };
 

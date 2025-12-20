@@ -110,7 +110,21 @@ class ApiClient {
         const response = await fetch(url, config);
         
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
+          let errorData = {};
+          try {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+              errorData = await response.json();
+            } else {
+              // If response is not JSON, try to get text
+              const text = await response.text();
+              errorData = { message: text || `HTTP error! status: ${response.status}` };
+            }
+          } catch (parseError) {
+            // If parsing fails, create a basic error object
+            errorData = { message: `HTTP error! status: ${response.status}` };
+          }
+          
           // Handle 401 errors (authentication required or token expired)
           if (response.status === 401) {
             // Check if we have a token (means user was authenticated but token expired)
@@ -156,9 +170,25 @@ class ApiClient {
             const message = errorData.message || 'دسترسی غیرمجاز';
             const error = new Error(message);
             error.status = 403;
+            error.data = errorData;
             throw error;
           }
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+          
+          // Handle 500 internal server errors
+          if (response.status >= 500) {
+            const message = errorData.message || 'خطای سرور. لطفاً بعداً تلاش کنید.';
+            const error = new Error(message);
+            error.status = response.status;
+            error.data = errorData;
+            throw error;
+          }
+          
+          // Handle other errors (400, 404, etc.)
+          const message = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
+          const error = new Error(message);
+          error.status = response.status;
+          error.data = errorData;
+          throw error;
         }
 
         return await response.json();
@@ -172,9 +202,11 @@ class ApiClient {
         }
         // Don't expose internal error details in production
         if (process.env.NODE_ENV === 'production') {
-          console.error('API request error');
+          // Log error silently without exposing to console
+          // Error will be logged by handleApiError if called
           throw new Error('An error occurred. Please try again.');
         }
+        // Only log in development
         console.error('API request error:', error);
         throw error;
       } finally {

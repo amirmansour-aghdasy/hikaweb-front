@@ -10,7 +10,8 @@ import StoreProvider from "./StoreProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Footer, Header, Breadcrumb } from "@/components/common";
 import { ActionButtonsContainer, ModalsContainer, ScriptsContainer } from "@/containers";
-import { generateOrganizationSchema, generateWebsiteSchema, defaultMetadata } from "@/lib/seo";
+import { generateOrganizationSchema, generateWebsiteSchema, generateNavigationSchema, defaultMetadata } from "@/lib/seo";
+import { navbarItems } from "@/lib/constants";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import { safeServerGet } from "@/lib/utils/safeServerGet";
 
@@ -86,9 +87,10 @@ export const viewport = {
 };
 
 export default async function RootLayout({ children }) {
-    // Generate structured data for organization and website
+    // Generate structured data for organization, website, and navigation
     const organizationSchema = generateOrganizationSchema();
     const websiteSchema = generateWebsiteSchema();
+    const navigationSchema = generateNavigationSchema(navbarItems);
 
     // Fetch Google verification code from settings API (with fallback to env variable)
     let googleVerificationCode = process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || '';
@@ -102,14 +104,17 @@ export default async function RootLayout({ children }) {
     } catch (error) {
         // Silently fallback to environment variable if API fails
         // This ensures the site still works even if Settings API is unavailable
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to fetch Google verification code from settings:', error);
-        }
+        // No logging needed - this is an expected fallback scenario
     }
 
     return (
-        <html lang="fa" dir="rtl" suppressHydrationWarning>
+        <html lang="fa" dir="rtl" data-scroll-behavior="smooth" suppressHydrationWarning>
             <head>
+                {/* Performance: Resource Hints */}
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+                <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL || 'https://api.hikaweb.ir'} />
+                
                 {/* Google Search Console Verification */}
                 {googleVerificationCode && (
                     <meta 
@@ -140,6 +145,10 @@ export default async function RootLayout({ children }) {
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
                 />
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(navigationSchema) }}
+                />
             </head>
             <body className={`container h-auto min-h-screen py-5 flex flex-col ${iranSanse.className} overflow-x-hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300`} suppressHydrationWarning>
                 <span className="absolute w-full top-0 right-0 h-1 bg-teal-500 dark:bg-teal-600"></span>
@@ -151,7 +160,9 @@ export default async function RootLayout({ children }) {
                             <ActionButtonsContainer />
                             <Header />
                             <Breadcrumb />
-                            {children}
+                            <main id="main-content" role="main" aria-label="محتوای اصلی">
+                                {children}
+                            </main>
                             <Footer />
                         </ErrorBoundary>
                     </ThemeProvider>

@@ -13,18 +13,33 @@ const PortfolioSlider = ({ order, slides }) => {
     return (
         <Swiper
             loop={hasEnoughSlides}
-            speed={1000}
-            autoplay={true}
+            speed={600}
+            autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            }}
             spaceBetween={5}
             slidesPerView={1.9}
             centeredSlides={true}
             modules={[Autoplay]}
             className={`w-full relative portfolio-slider`}
             breakpoints={{ 640: { slidesPerView: 4, spaceBetween: 7 } }}
+            watchOverflow={true}
         >
             {slides.map(({ imageSrc, alt, title }, i) => (
-                <SwiperSlide className="rounded-xl overflow-hidden" key={i}>
-                    <Image src={imageSrc} width="0" height="0" sizes="100vw" className="w-full h-auto" alt={alt} title={title} />
+                <SwiperSlide className="rounded-xl overflow-hidden shadow-md dark:shadow-slate-800/50 border border-slate-200 dark:border-slate-700" key={i}>
+                    <Image 
+                        src={imageSrc} 
+                        width="0" 
+                        height="0" 
+                        sizes="(max-width: 640px) 50vw, 25vw" 
+                        className="w-full h-auto dark:brightness-90 dark:contrast-105" 
+                        alt={alt} 
+                        title={title}
+                        loading="lazy"
+                        quality={85}
+                    />
                 </SwiperSlide>
             ))}
         </Swiper>

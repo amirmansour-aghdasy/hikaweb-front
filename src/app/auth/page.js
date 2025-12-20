@@ -106,10 +106,21 @@ function LoginPageContent() {
             // No need to manually redirect here
         } catch (error) {
             console.error("Error verifying OTP:", error);
+            // Extract error message
+            const errorMessage = error.response?.data?.message || error.data?.message || error.message || "کد تایید نادرست است";
+            
+            // Show specific error message
+            if (errorMessage.includes("نادرست") || errorMessage.includes("نامعتبر")) {
+                toast.error("کد تایید وارد شده اشتباه است. لطفاً دوباره تلاش کنید.");
+            } else {
+                toast.error(errorMessage);
+            }
+            
             // Reset code and submission flag on error
             setCode("");
             isSubmittingRef.current = false;
-            // Reset OTP input submission flag by clearing and setting code
+            
+            // Force reset OTP input by clearing and setting code after a delay
             setTimeout(() => {
                 setCode("");
             }, 100);

@@ -170,7 +170,28 @@ const useAuthStore = create(
                     toast.success(additionalData.name ? "ثبت نام موفقیت‌آمیز" : "ورود موفقیت‌آمیز");
                     return response.data;
                 } catch (error) {
-                    const message = error.message || "کد نامعتبر";
+                    // Extract error message from different possible locations
+                    let message = "کد تایید نادرست است";
+                    
+                    if (error.response?.data?.message) {
+                        message = error.response.data.message;
+                    } else if (error.data?.message) {
+                        message = error.data.message;
+                    } else if (error.message) {
+                        // Check if it's a user-friendly message
+                        const userFriendlyMessages = [
+                            'کد تایید',
+                            'منقضی',
+                            'تلاش',
+                            'نادرست',
+                            'نامعتبر'
+                        ];
+                        const errorMessage = error.message.toLowerCase();
+                        if (userFriendlyMessages.some(msg => errorMessage.includes(msg))) {
+                            message = error.message;
+                        }
+                    }
+                    
                     toast.error(message);
                     throw error;
                 } finally {
@@ -179,9 +200,88 @@ const useAuthStore = create(
             },
 
             // OAuth login
-            oauthLogin: (provider) => {
-                const redirectUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/${provider}`;
-                window.location.href = redirectUrl;
+            oauthLogin: async (provider) => {
+                if (provider === "google") {
+                    try {
+                        set({ isLoading: true });
+                        
+                        // Load Google Sign-In script if not already loaded
+                        if (!window.google) {
+                            await new Promise((resolve, reject) => {
+                                const script = document.createElement('script');
+                                script.src = 'https://accounts.google.com/gsi/client';
+                                script.async = true;
+                                script.defer = true;
+                                script.onload = resolve;
+                                script.onerror = () => {
+                                    console.error("Failed to load Google Sign-In SDK");
+                                    reject(new Error("Failed to load Google Sign-In"));
+                                };
+                                document.head.appendChild(script);
+                            });
+                        }
+
+                        // Initialize and trigger Google Sign-In
+                        if (window.google && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+                            window.google.accounts.id.initialize({
+                                client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+                                callback: async (response) => {
+                                    try {
+                                        // Send ID token to backend
+                                        const result = await apiClient.post("/auth/google", {
+                                            idToken: response.credential
+                                        });
+
+                                        const { user, tokens } = result.data || {};
+
+                                        if (!tokens || !tokens.accessToken) {
+                                            throw new Error("خطا در دریافت توکن‌ها");
+                                        }
+
+                                        // Store tokens
+                                        const cookieOptions = {
+                                            expires: 7,
+                                            path: "/",
+                                            sameSite: "lax",
+                                            secure: process.env.NODE_ENV === "production"
+                                        };
+                                        
+                                        Cookies.set("accessToken", tokens.accessToken, cookieOptions);
+                                        Cookies.set("refreshToken", tokens.refreshToken, cookieOptions);
+
+                                        set({
+                                            user,
+                                            isAuthenticated: true,
+                                            isLoading: false
+                                        });
+
+                                        toast.success("ورود با گوگل موفقیت‌آمیز بود");
+                                        
+                                        // Redirect will happen via useEffect when isAuthenticated changes
+                                    } catch (error) {
+                                        const message = error.response?.data?.message || error.data?.message || error.message || "خطا در ورود با گوگل";
+                                        toast.error(message);
+                                        set({ isLoading: false });
+                                    }
+                                }
+                            });
+
+                            // Trigger Google Sign-In popup
+                            window.google.accounts.id.prompt();
+                        } else {
+                            throw new Error("Google Sign-In SDK not available or client ID not configured");
+                        }
+                    } catch (error) {
+                        console.error("Google OAuth error:", error);
+                        toast.error("خطا در بارگذاری Google Sign-In. لطفاً دوباره تلاش کنید.");
+                        set({ isLoading: false });
+                    }
+                } else {
+                    // For other providers (LinkedIn, etc.), use redirect method
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+                    const redirectUrl = `${apiUrl}/api/v1/auth/${provider}`;
+                    window.location.href = redirectUrl;
+                }
             },
 
             // Logout

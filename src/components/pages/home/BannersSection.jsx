@@ -22,7 +22,7 @@ export default function BannersSection({ banners = [] }) {
     }
 
     return (
-        <section id="home-page-banners" className="w-full grid grid-cols-1 md:grid-cols-2 place-items-center gap-5">
+        <section id="home-page-banners" className="w-full section-spacing grid grid-cols-1 md:grid-cols-2 place-items-center gap-5">
             {banners.map((banner, index) => {
                 const imageUrl = isMobile && banner.mobileImage 
                     ? banner.mobileImage 
@@ -45,9 +45,11 @@ export default function BannersSection({ banners = [] }) {
                             height="0" 
                             alt={altText} 
                             title={altText}
-                            sizes="100vw" 
+                            sizes="(max-width: 768px) 100vw, 50vw" 
                             className="w-full h-auto" 
                             priority={index < 2}
+                            quality={index < 2 ? 90 : 85}
+                            loading={index < 2 ? undefined : "lazy"}
                         />
                     </Link>
                 );

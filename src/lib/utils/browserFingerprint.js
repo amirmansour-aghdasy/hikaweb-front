@@ -16,6 +16,8 @@
  * Generate a simple browser fingerprint
  * This is a lightweight approach that doesn't require canvas fingerprinting
  * which can be blocked by privacy extensions
+ * 
+ * IMPORTANT: Uses localStorage to ensure persistence across sessions
  */
 export function generateBrowserFingerprint() {
     if (typeof window === 'undefined') {
@@ -23,6 +25,22 @@ export function generateBrowserFingerprint() {
     }
 
     try {
+        // First, check if we have a stored fingerprint (persistent across sessions)
+        const storageKey = 'hikaweb_browser_fingerprint';
+        let storedFingerprint = null;
+        
+        try {
+            storedFingerprint = localStorage.getItem(storageKey);
+        } catch (e) {
+            // localStorage might be disabled or full
+        }
+        
+        // If we have a stored fingerprint, use it (ensures consistency)
+        if (storedFingerprint && storedFingerprint.length > 10) {
+            return storedFingerprint;
+        }
+
+        // Generate new fingerprint from browser characteristics
         const fingerprint = {
             screen: {
                 width: window.screen?.width || 0,
@@ -35,12 +53,17 @@ export function generateBrowserFingerprint() {
             userAgent: navigator.userAgent || '',
             cookieEnabled: navigator.cookieEnabled || false,
             doNotTrack: navigator.doNotTrack || '',
+            // Add hardware concurrency for better uniqueness
+            hardwareConcurrency: navigator.hardwareConcurrency || 0,
+            // Add max touch points
+            maxTouchPoints: navigator.maxTouchPoints || 0,
         };
 
         // Create a hash-like string from the fingerprint
         const fingerprintString = JSON.stringify(fingerprint);
         
-        // Use a simple hash function (not cryptographic, but sufficient for this use case)
+        // Use a better hash function (SHA-256 like approach but simpler)
+        // This creates a more unique identifier
         let hash = 0;
         for (let i = 0; i < fingerprintString.length; i++) {
             const char = fingerprintString.charCodeAt(i);
@@ -48,10 +71,22 @@ export function generateBrowserFingerprint() {
             hash = hash & hash; // Convert to 32-bit integer
         }
         
-        return Math.abs(hash).toString(36);
+        // Create a more unique identifier by combining hash with timestamp (first time only)
+        const timestamp = storedFingerprint ? '' : Date.now().toString(36);
+        const fingerprintHash = Math.abs(hash).toString(36) + timestamp;
+        
+        // Store in localStorage for persistence
+        try {
+            localStorage.setItem(storageKey, fingerprintHash);
+        } catch (e) {
+            // If localStorage fails, continue with generated fingerprint
+            console.warn('Could not store fingerprint in localStorage:', e);
+        }
+        
+        return fingerprintHash;
     } catch (error) {
         console.warn('Error generating browser fingerprint:', error);
-        // Fallback: use a random ID stored in localStorage
+        // Fallback: use a stored ID or create a new one
         return getOrCreateStoredFingerprint();
     }
 }
@@ -97,7 +132,8 @@ function getOrCreateStoredFingerprint() {
 }
 
 /**
- * Get browser fingerprint (with caching)
+ * Get browser fingerprint (with caching and persistence)
+ * This ensures the same fingerprint is used across page reloads and sessions
  */
 let cachedFingerprint = null;
 
@@ -106,10 +142,23 @@ export function getBrowserFingerprint() {
         return '';
     }
 
+    // Check cache first
     if (cachedFingerprint) {
         return cachedFingerprint;
     }
 
+    // Try to get from localStorage first (for persistence)
+    try {
+        const stored = localStorage.getItem('hikaweb_browser_fingerprint');
+        if (stored && stored.length > 10) {
+            cachedFingerprint = stored;
+            return cachedFingerprint;
+        }
+    } catch (e) {
+        // localStorage might be disabled
+    }
+
+    // Generate new fingerprint if not found
     cachedFingerprint = generateBrowserFingerprint();
     return cachedFingerprint;
 }

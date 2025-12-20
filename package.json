@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "next lint",
-    "generate-icons": "node scripts/generate-pwa-icons.js"
+    "generate-icons": "node scripts/generate-pwa-icons.js",
+    "remove-gif-background": "node scripts/remove-gif-white-background.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
@@ -26,6 +27,7 @@
     "leaflet": "^1.9.4",
     "next": "^15.1.9",
     "next-auth": "^4.24.11",
+    "plyr": "^3.8.3",
     "postcss": "8.4.47",
     "react": "18.3.1",
     "react-countup": "^6.5.3",
@@ -33,6 +35,7 @@
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.3.0",
     "react-leaflet": "^4.2.1",
+    "react-player": "^3.4.0",
     "react-redux": "^9.1.2",
     "react-typed": "^2.0.12",
     "swiper": "^11.1.14",

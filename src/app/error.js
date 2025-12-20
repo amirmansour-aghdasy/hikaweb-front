@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { HiExclamationTriangle } from "react-icons/hi2";
 import { HiRefresh, HiHome } from "react-icons/hi";
 import Link from "next/link";
+import { logError } from "@/lib/utils/errorLogger";
 
 export default function Error({ error, reset }) {
     useEffect(() => {
@@ -12,8 +13,12 @@ export default function Error({ error, reset }) {
             console.error('Next.js Error:', error);
         }
 
-        // You can also log the error to an error reporting service here
-        // Example: logErrorToService(error);
+        // Log error to error reporting service in production
+        if (process.env.NODE_ENV === 'production') {
+            logError(error, {
+                type: 'nextjs_error',
+            });
+        }
     }, [error]);
 
     return (
