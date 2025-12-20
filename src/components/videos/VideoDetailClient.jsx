@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { apiClient } from "@/services/api/client";
 import { getBrowserFingerprint } from "@/lib/utils/browserFingerprint";
-import { useAuthStore } from "@/lib/store/authStore";
+import useAuthStore from "@/lib/store/authStore";
 import VideoPlayer from "./VideoPlayer";
 import toast from "react-hot-toast";
 import { 
@@ -35,7 +35,8 @@ const RelatedPortfolios = dynamic(() => import("@/components/articles/RelatedPor
     ssr: true,
 });
 
-const RelatedServices = dynamic(() => import("@/components/services/RelatedServices"), {
+// RelatedServices component removed - using ServicesListingClient instead
+const ServicesListingClient = dynamic(() => import("@/components/services/ServicesListingClient"), {
     ssr: true,
 });
 
@@ -496,7 +497,7 @@ export default function VideoDetailClient({
                     {/* Related Services */}
                     {relatedContent?.services && relatedContent.services.length > 0 && (
                         <div className="mb-12" data-aos="fade-up">
-                            <RelatedServices services={relatedContent.services} />
+                            <ServicesListingClient services={relatedContent.services} />
                         </div>
                     )}
                 </div>

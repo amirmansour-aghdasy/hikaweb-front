@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import ReactPlayer from "react-player";
-import { HiPlay, HiPause, HiVolumeUp, HiVolumeOff, HiArrowsPointingOut, HiXMark } from "react-icons/hi2";
+import { HiPlay, HiPause, HiArrowsPointingOut, HiXMark } from "react-icons/hi2";
+import { HiVolumeUp, HiVolumeOff } from "react-icons/hi";
 import { BsFillPlayFill, BsPauseFill } from "react-icons/bs";
 import Image from "next/image";
 

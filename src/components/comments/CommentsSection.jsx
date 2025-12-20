@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { apiClient } from "@/services/api/client";
-import { useAuthStore } from "@/lib/store/authStore";
+import useAuthStore from "@/lib/store/authStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import toast from "react-hot-toast";
